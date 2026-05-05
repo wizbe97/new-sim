@@ -6,84 +6,117 @@ namespace Project.Managers
     public sealed class GameManager : MonoBehaviour
     {
         [Header("Manager Prefabs")]
-        [SerializeField] private PlayerManager playerManagerPrefab;
-        [SerializeField] private CameraManager cameraManagerPrefab;
         [SerializeField] private UIManager uiManagerPrefab;
         [SerializeField] private CursorManager cursorManagerPrefab;
         [SerializeField] private PlacementManager placementManagerPrefab;
+        [SerializeField] private PlayerBalanceManager playerBalanceManagerPrefab;
+        [SerializeField] private PhoneManager phoneManagerPrefab;
+        [SerializeField] private PlayerManager playerManagerPrefab;
+        [SerializeField] private CameraManager cameraManagerPrefab;
 
         [Header("Scene References")]
         [SerializeField] private PlayerSpawnPoint playerSpawnPoint;
 
-        private PlayerManager playerManager;
-        private CameraManager cameraManager;
         private UIManager uiManager;
         private CursorManager cursorManager;
         private PlacementManager placementManager;
+        private PlayerBalanceManager playerBalanceManager;
+        private PhoneManager phoneManager;
+        private PlayerManager playerManager;
+        private CameraManager cameraManager;
 
-        public PlayerManager PlayerManager => playerManager;
-        public CameraManager CameraManager => cameraManager;
         public UIManager UIManager => uiManager;
         public CursorManager CursorManager => cursorManager;
         public PlacementManager PlacementManager => placementManager;
+        public PlayerBalanceManager PlayerBalanceManager => playerBalanceManager;
+        public PhoneManager PhoneManager => phoneManager;
+        public PlayerManager PlayerManager => playerManager;
+        public CameraManager CameraManager => cameraManager;
 
         private void Awake()
         {
             SpawnManagers();
+
+            if (!HasRequiredManagers())
+            {
+                Debug.LogError($"{nameof(GameManager)} failed to initialize because one or more required managers are missing.");
+                return;
+            }
+
             InitializeManagers();
         }
 
         private void SpawnManagers()
         {
-            playerManager = SpawnManager(playerManagerPrefab, "PlayerManager");
-            cameraManager = SpawnManager(cameraManagerPrefab, "CameraManager");
-            uiManager = SpawnManager(uiManagerPrefab, "UIManager");
-            cursorManager = SpawnManager(cursorManagerPrefab, "CursorManager");
-            placementManager = SpawnManager(placementManagerPrefab, "PlacementManager");
+            uiManager = SpawnManager(uiManagerPrefab, nameof(UIManager));
+            cursorManager = SpawnManager(cursorManagerPrefab, nameof(CursorManager));
+            placementManager = SpawnManager(placementManagerPrefab, nameof(PlacementManager));
+            playerBalanceManager = SpawnManager(playerBalanceManagerPrefab, nameof(PlayerBalanceManager));
+            phoneManager = SpawnManager(phoneManagerPrefab, nameof(PhoneManager));
+            playerManager = SpawnManager(playerManagerPrefab, nameof(PlayerManager));
+            cameraManager = SpawnManager(cameraManagerPrefab, nameof(CameraManager));
+        }
+
+        private bool HasRequiredManagers()
+        {
+            bool hasRequiredManagers = true;
+
+            hasRequiredManagers &= ValidateManager(uiManager, nameof(UIManager));
+            hasRequiredManagers &= ValidateManager(cursorManager, nameof(CursorManager));
+            hasRequiredManagers &= ValidateManager(placementManager, nameof(PlacementManager));
+            hasRequiredManagers &= ValidateManager(playerBalanceManager, nameof(PlayerBalanceManager));
+            hasRequiredManagers &= ValidateManager(phoneManager, nameof(PhoneManager));
+            hasRequiredManagers &= ValidateManager(playerManager, nameof(PlayerManager));
+            hasRequiredManagers &= ValidateManager(cameraManager, nameof(CameraManager));
+
+            return hasRequiredManagers;
         }
 
         private void InitializeManagers()
         {
-            if (uiManager == null)
-            {
-                Debug.LogError($"{nameof(GameManager)} cannot initialize because UIManager is missing.");
-                return;
-            }
+            InitializeEconomy();
+            InitializeUI();
+            InitializePlayer();
+            InitializeCamera();
+            InitializePlacement();
+            InitializeCursor();
+            InitializePhone();
+        }
 
-            uiManager.Initialize();
+        private void InitializeEconomy()
+        {
+            playerBalanceManager.Initialize();
+        }
 
-            if (placementManager == null)
-            {
-                Debug.LogError($"{nameof(GameManager)} cannot initialize because PlacementManager is missing.");
-                return;
-            }
+        private void InitializeUI()
+        {
+            uiManager.Initialize(playerBalanceManager);
+        }
 
-            if (playerManager == null)
-            {
-                Debug.LogError($"{nameof(GameManager)} cannot initialize because PlayerManager is missing.");
-                return;
-            }
-
+        private void InitializePlayer()
+        {
             playerManager.SetFallbackSpawnPoint(playerSpawnPoint);
             playerManager.Initialize(uiManager, placementManager);
+        }
 
-            if (cameraManager == null)
-            {
-                Debug.LogError($"{nameof(GameManager)} cannot initialize because CameraManager is missing.");
-                return;
-            }
-
+        private void InitializeCamera()
+        {
             cameraManager.Initialize(playerManager.CurrentPlayer);
+        }
 
+        private void InitializePlacement()
+        {
             placementManager.Initialize(playerManager.CurrentPlayer);
+        }
 
-            if (cursorManager == null)
-            {
-                Debug.LogError($"{nameof(GameManager)} cannot initialize because CursorManager is missing.");
-                return;
-            }
-
+        private void InitializeCursor()
+        {
             cursorManager.Initialize(uiManager);
+        }
+
+        private void InitializePhone()
+        {
+            phoneManager.Initialize(playerManager.CurrentPlayer, uiManager, cursorManager);
         }
 
         private T SpawnManager<T>(T prefab, string managerName) where T : MonoBehaviour
@@ -98,6 +131,17 @@ namespace Project.Managers
             instance.name = managerName;
 
             return instance;
+        }
+
+        private bool ValidateManager<T>(T manager, string managerName) where T : MonoBehaviour
+        {
+            if (manager != null)
+            {
+                return true;
+            }
+
+            Debug.LogError($"{nameof(GameManager)} cannot initialize because {managerName} is missing.");
+            return false;
         }
     }
 }

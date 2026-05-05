@@ -89,6 +89,15 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""PhoneMenu"",
+                    ""type"": ""Button"",
+                    ""id"": ""12e3f552-3ae1-4dfa-be28-5027f3783966"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -212,6 +221,17 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""action"": ""Move"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""c50921b8-0d15-4636-8b16-826ac7a464e3"",
+                    ""path"": ""<Keyboard>/tab"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""PhoneMenu"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -227,6 +247,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         m_Player_Interact = m_Player.FindAction("Interact", throwIfNotFound: true);
         m_Player_Rotate = m_Player.FindAction("Rotate", throwIfNotFound: true);
         m_Player_Cancel = m_Player.FindAction("Cancel", throwIfNotFound: true);
+        m_Player_PhoneMenu = m_Player.FindAction("PhoneMenu", throwIfNotFound: true);
     }
 
     ~@PlayerInputActions()
@@ -300,6 +321,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Interact;
     private readonly InputAction m_Player_Rotate;
     private readonly InputAction m_Player_Cancel;
+    private readonly InputAction m_Player_PhoneMenu;
     public struct PlayerActions
     {
         private @PlayerInputActions m_Wrapper;
@@ -311,6 +333,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         public InputAction @Interact => m_Wrapper.m_Player_Interact;
         public InputAction @Rotate => m_Wrapper.m_Player_Rotate;
         public InputAction @Cancel => m_Wrapper.m_Player_Cancel;
+        public InputAction @PhoneMenu => m_Wrapper.m_Player_PhoneMenu;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -341,6 +364,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @Cancel.started += instance.OnCancel;
             @Cancel.performed += instance.OnCancel;
             @Cancel.canceled += instance.OnCancel;
+            @PhoneMenu.started += instance.OnPhoneMenu;
+            @PhoneMenu.performed += instance.OnPhoneMenu;
+            @PhoneMenu.canceled += instance.OnPhoneMenu;
         }
 
         private void UnregisterCallbacks(IPlayerActions instance)
@@ -366,6 +392,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @Cancel.started -= instance.OnCancel;
             @Cancel.performed -= instance.OnCancel;
             @Cancel.canceled -= instance.OnCancel;
+            @PhoneMenu.started -= instance.OnPhoneMenu;
+            @PhoneMenu.performed -= instance.OnPhoneMenu;
+            @PhoneMenu.canceled -= instance.OnPhoneMenu;
         }
 
         public void RemoveCallbacks(IPlayerActions instance)
@@ -392,5 +421,6 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         void OnInteract(InputAction.CallbackContext context);
         void OnRotate(InputAction.CallbackContext context);
         void OnCancel(InputAction.CallbackContext context);
+        void OnPhoneMenu(InputAction.CallbackContext context);
     }
 }

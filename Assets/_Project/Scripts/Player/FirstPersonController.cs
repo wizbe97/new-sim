@@ -22,11 +22,13 @@ namespace Project.Player
 
         private bool isSprinting;
         private bool jumpWasCut;
+        private bool canMove = true;
 
         private float lastGroundedTime = -999f;
         private float lastJumpPressedTime = -999f;
 
         public Transform CameraTarget => cameraTarget;
+        public bool CanMove => canMove;
 
         private void Awake()
         {
@@ -54,6 +56,11 @@ namespace Project.Player
 
         private void Update()
         {
+            if (!canMove)
+            {
+                return;
+            }
+
             HandleLook();
             HandleMovement();
         }
@@ -61,6 +68,20 @@ namespace Project.Player
         public void SetStats(PlayerStats newStats)
         {
             stats = newStats;
+        }
+
+        public void SetCanMove(bool value)
+        {
+            canMove = value;
+
+            if (canMove)
+            {
+                return;
+            }
+
+            horizontalVelocity = Vector3.zero;
+            isSprinting = false;
+            lastJumpPressedTime = -999f;
         }
 
         private void HandleLook()
@@ -191,11 +212,21 @@ namespace Project.Player
 
         private void HandleJumpPressed()
         {
+            if (!canMove)
+            {
+                return;
+            }
+
             lastJumpPressedTime = Time.time;
         }
 
         private void HandleJumpReleased()
         {
+            if (!canMove)
+            {
+                return;
+            }
+
             if (verticalVelocity <= 0f)
             {
                 return;
@@ -213,6 +244,11 @@ namespace Project.Player
 
         private void HandleSprintStarted()
         {
+            if (!canMove)
+            {
+                return;
+            }
+
             isSprinting = true;
         }
 

@@ -8,6 +8,12 @@ namespace Project.Managers
 
         public void Initialize(UIManager newUIManager)
         {
+            if (newUIManager == null)
+            {
+                Debug.LogError($"{nameof(CursorManager)} cannot initialize because UIManager is missing.");
+                return;
+            }
+
             uiManager = newUIManager;
             EnableGameplayCursorMode();
         }
@@ -19,7 +25,7 @@ namespace Project.Managers
 
             if (uiManager != null)
             {
-                uiManager.SetGameplayHUDVisible(true);
+                uiManager.SetReticleVisible(true);
             }
         }
 
@@ -30,8 +36,18 @@ namespace Project.Managers
 
             if (uiManager != null)
             {
-                uiManager.SetGameplayHUDVisible(false);
+                uiManager.SetReticleVisible(false);
             }
+        }
+
+        public void EnterGameplayMode()
+        {
+            EnableGameplayCursorMode();
+        }
+
+        public void EnterUIMode()
+        {
+            EnableMenuCursorMode();
         }
     }
 }

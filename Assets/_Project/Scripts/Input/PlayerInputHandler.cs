@@ -19,6 +19,7 @@ namespace Project.Input
         public event Action InteractPressed;
         public event Action RotatePressed;
         public event Action CancelPressed;
+        public event Action PhoneMenuPressed;
 
         private void Awake()
         {
@@ -44,6 +45,7 @@ namespace Project.Input
             inputActions.Player.Interact.performed += OnInteractPerformed;
             inputActions.Player.Rotate.performed += OnRotatePerformed;
             inputActions.Player.Cancel.performed += OnCancelPerformed;
+            inputActions.Player.PhoneMenu.performed += OnPhoneMenuPerformed;
         }
 
         private void OnDisable()
@@ -63,6 +65,7 @@ namespace Project.Input
             inputActions.Player.Interact.performed -= OnInteractPerformed;
             inputActions.Player.Rotate.performed -= OnRotatePerformed;
             inputActions.Player.Cancel.performed -= OnCancelPerformed;
+            inputActions.Player.PhoneMenu.performed -= OnPhoneMenuPerformed;
 
             inputActions.Player.Disable();
         }
@@ -125,6 +128,11 @@ namespace Project.Input
         private void OnCancelPerformed(UnityEngine.InputSystem.InputAction.CallbackContext context)
         {
             CancelPressed?.Invoke();
+        }
+
+        private void OnPhoneMenuPerformed(UnityEngine.InputSystem.InputAction.CallbackContext context)
+        {
+            PhoneMenuPressed?.Invoke();
         }
     }
 }

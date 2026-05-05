@@ -24,7 +24,10 @@ namespace Project.Player
         private PlacementManager placementManager;
         private IInteractable currentInteractable;
 
+        private bool canInteract = true;
+
         public IInteractable CurrentInteractable => currentInteractable;
+        public bool CanInteract => canInteract;
 
         private void Awake()
         {
@@ -48,6 +51,12 @@ namespace Project.Player
 
         private void Update()
         {
+            if (!canInteract)
+            {
+                ClearCurrentInteractable();
+                return;
+            }
+
             UpdateCurrentInteractable();
         }
 
@@ -57,6 +66,16 @@ namespace Project.Player
             placementManager = newPlacementManager;
 
             UpdateReticleState();
+        }
+
+        public void SetCanInteract(bool value)
+        {
+            canInteract = value;
+
+            if (!canInteract)
+            {
+                ClearCurrentInteractable();
+            }
         }
 
         private void UpdateCurrentInteractable()
@@ -108,6 +127,17 @@ namespace Project.Player
             UpdateReticleStateIfChanged(previousInteractable);
         }
 
+        private void ClearCurrentInteractable()
+        {
+            if (currentInteractable == null)
+            {
+                return;
+            }
+
+            currentInteractable = null;
+            UpdateReticleState();
+        }
+
         private void UpdateReticleStateIfChanged(IInteractable previousInteractable)
         {
             if (ReferenceEquals(previousInteractable, currentInteractable))
@@ -130,6 +160,11 @@ namespace Project.Player
 
         private void HandleInteractPressed()
         {
+            if (!canInteract)
+            {
+                return;
+            }
+
             if (placementManager != null && placementManager.IsPlacing)
             {
                 return;

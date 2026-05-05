@@ -67,6 +67,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "PhoneMenu",
+                    "type": "Button",
+                    "id": "12e3f552-3ae1-4dfa-be28-5027f3783966",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -190,6 +199,17 @@
                     "action": "Move",
                     "isComposite": false,
                     "isPartOfComposite": true
+                },
+                {
+                    "name": "",
+                    "id": "c50921b8-0d15-4636-8b16-826ac7a464e3",
+                    "path": "<Keyboard>/tab",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "PhoneMenu",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         }
