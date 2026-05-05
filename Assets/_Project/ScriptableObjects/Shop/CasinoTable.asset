@@ -12,5 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f89093e11ecd2144bebf48e93900d94, type: 3}
   m_Name: CasinoTable
   m_EditorClassIdentifier: 
-  displayName: New Store Item
+  displayName: Basic Table
   price: 100
