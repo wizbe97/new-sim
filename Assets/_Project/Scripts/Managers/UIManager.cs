@@ -212,16 +212,22 @@ namespace Project.Managers
                 return;
             }
 
+            if (phone != null && phone.IsUniqueItemOwned(storeItem))
+            {
+                Debug.Log($"{storeItem.ItemName} is unique and has already been purchased.");
+                return;
+            }
+
             if (playerBalanceManager == null)
             {
-                Debug.LogError($"{nameof(UIManager)} cannot buy {storeItem.DisplayName} because PlayerBalanceManager is missing.");
+                Debug.LogError($"{nameof(UIManager)} cannot buy {storeItem.ItemName} because PlayerBalanceManager is missing.");
                 return;
             }
 
             if (!playerBalanceManager.CanAfford(storeItem.Price))
             {
                 Debug.Log(
-                    $"Not enough money to buy {storeItem.DisplayName}. " +
+                    $"Not enough money to buy {storeItem.ItemName}. " +
                     $"Price: ${storeItem.Price:N0}, Balance: ${playerBalanceManager.CurrentBalance:N0}"
                 );
 
@@ -232,11 +238,16 @@ namespace Project.Managers
 
             if (!purchaseSuccessful)
             {
-                Debug.Log($"Purchase failed for {storeItem.DisplayName}.");
+                Debug.Log($"Purchase failed for {storeItem.ItemName}.");
                 return;
             }
 
-            Debug.Log($"Bought {storeItem.DisplayName} for ${storeItem.Price:N0}.");
+            if (phone != null)
+            {
+                phone.MarkItemPurchased(storeItem);
+            }
+
+            Debug.Log($"Bought {storeItem.ItemName} for ${storeItem.Price:N0}.");
         }
 
         private void OnDestroy()

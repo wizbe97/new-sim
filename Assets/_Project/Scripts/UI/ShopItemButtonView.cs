@@ -8,16 +8,20 @@ namespace Project.UI
 {
     public sealed class ShopItemButtonView : MonoBehaviour
     {
-        [Header("Item")]
-        [SerializeField] private StoreItemSO storeItem;
-
         [Header("References")]
         [SerializeField] private TextMeshProUGUI itemNameText;
         [SerializeField] private TextMeshProUGUI priceText;
+        [SerializeField] private Image itemIconImage;
         [SerializeField] private Button buyButton;
+        [SerializeField] private TextMeshProUGUI buyButtonText;
 
         [Header("Formatting")]
         [SerializeField] private string currencyPrefix = "$";
+        [SerializeField] private string buyText = "Buy";
+        [SerializeField] private string ownedText = "Owned";
+
+        private StoreItemSO storeItem;
+        private bool isOwned;
 
         public event Action<StoreItemSO> BuyPressed;
 
@@ -29,8 +33,6 @@ namespace Project.UI
             {
                 buyButton.onClick.AddListener(HandleBuyButtonClicked);
             }
-
-            Refresh();
         }
 
         private void OnDestroy()
@@ -41,22 +43,60 @@ namespace Project.UI
             }
         }
 
+        public void Initialize(StoreItemSO item, bool owned)
+        {
+            storeItem = item;
+            isOwned = owned;
+
+            Refresh();
+        }
+
+        public void SetOwned(bool owned)
+        {
+            isOwned = owned;
+            RefreshPurchaseState();
+        }
+
         public void Refresh()
         {
             if (storeItem == null)
             {
-                Debug.LogError($"{nameof(ShopItemButtonView)} on {name} is missing Store Item.");
+                Debug.LogError($"{nameof(ShopItemButtonView)} on {name} cannot refresh because Store Item is missing.");
                 return;
             }
 
             if (itemNameText != null)
             {
-                itemNameText.text = storeItem.DisplayName;
+                itemNameText.text = storeItem.ItemName;
             }
 
             if (priceText != null)
             {
                 priceText.text = $"{currencyPrefix}{storeItem.Price:N0}";
+            }
+
+            if (itemIconImage != null)
+            {
+                itemIconImage.sprite = storeItem.ItemIcon;
+                itemIconImage.enabled = storeItem.ItemIcon != null;
+                itemIconImage.preserveAspect = true;
+            }
+
+            RefreshPurchaseState();
+        }
+
+        private void RefreshPurchaseState()
+        {
+            bool shouldDisableBecauseOwned = storeItem != null && storeItem.IsUniqueItem && isOwned;
+
+            if (buyButton != null)
+            {
+                buyButton.interactable = !shouldDisableBecauseOwned;
+            }
+
+            if (buyButtonText != null)
+            {
+                buyButtonText.text = shouldDisableBecauseOwned ? ownedText : buyText;
             }
         }
 
@@ -65,6 +105,12 @@ namespace Project.UI
             if (storeItem == null)
             {
                 Debug.LogError($"{nameof(ShopItemButtonView)} on {name} cannot buy because Store Item is missing.");
+                return;
+            }
+
+            if (storeItem.IsUniqueItem && isOwned)
+            {
+                Debug.Log($"{storeItem.ItemName} is unique and has already been purchased.");
                 return;
             }
 
