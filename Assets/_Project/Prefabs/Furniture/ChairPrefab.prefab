@@ -28,8 +28,8 @@ Transform:
   m_GameObject: {fileID: 1491278619745159034}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.56039757, y: -1.342386, z: 0}
-  m_LocalScale: {x: 0.18925528, y: 23.301168, z: 1}
+  m_LocalPosition: {x: -0.56039757, y: 2.1, z: 0}
+  m_LocalScale: {x: 0.18925528, y: 16.535908, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 6916122997140377608}
@@ -119,6 +119,7 @@ GameObject:
   - component: {fileID: 7122419197313269577}
   - component: {fileID: 5411251812719322354}
   - component: {fileID: 523712777031901890}
+  - component: {fileID: 4849770188485271952}
   m_Layer: 0
   m_Name: ChairPrefab
   m_TagString: Untagged
@@ -243,6 +244,33 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   interactionPrompt: Pick up Furniture
+--- !u!54 &4849770188485271952
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2604447119195495255}
+  serializedVersion: 4
+  m_Mass: 5
+  m_Drag: 1
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 1
+  m_Constraints: 80
+  m_CollisionDetection: 2
 --- !u!1 &5490972036779585169
 GameObject:
   m_ObjectHideFlags: 0

@@ -16,6 +16,13 @@ namespace Project.Shop
         [SerializeField] private StoreItemType itemType = StoreItemType.Misc;
         [SerializeField] private Sprite itemIcon;
 
+        [Header("World Item")]
+        [Tooltip("The actual furniture/item prefab that should appear when the delivery box is opened.")]
+        [SerializeField] private GameObject placeablePrefab;
+
+        [Tooltip("The cardboard box prefab that should fall onto the delivery pad when this item is bought.")]
+        [SerializeField] private DeliveryBox deliveryBoxPrefab;
+
         [Header("Purchase")]
         [SerializeField, Min(0)] private int price = 100;
         [SerializeField] private bool isUniqueItem;
@@ -25,11 +32,11 @@ namespace Project.Shop
         public string ItemDescription => itemDescription;
         public StoreItemType ItemType => itemType;
         public Sprite ItemIcon => itemIcon;
+        public GameObject PlaceablePrefab => placeablePrefab;
+        public DeliveryBox DeliveryBoxPrefab => deliveryBoxPrefab;
         public int Price => price;
         public bool IsUniqueItem => isUniqueItem;
 
-        // Backwards-compatible property.
-        // Your current UIManager uses DisplayName, so this keeps older code safe.
         public string DisplayName => itemName;
 
 #if UNITY_EDITOR

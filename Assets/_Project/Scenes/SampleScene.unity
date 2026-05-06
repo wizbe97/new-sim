@@ -599,7 +599,9 @@ MonoBehaviour:
   phoneManagerPrefab: {fileID: 7859518817601130054, guid: a5a83218de6cd6b4b8c157bf24456fe3, type: 3}
   playerManagerPrefab: {fileID: 5327621969224824429, guid: f0ab6bf2ec96c8748884c25d75f62888, type: 3}
   cameraManagerPrefab: {fileID: 6369030254122718112, guid: 49698b2bb77f1f24ba750a916efcf71f, type: 3}
+  itemDeliveryManagerPrefab: {fileID: 6108589076616117238, guid: 19bd9b76ec240c24f84a1a69c5b8f100, type: 3}
   playerSpawnPoint: {fileID: 185609790}
+  itemDeliveryPad: {fileID: 1825613434}
 --- !u!4 &1678277871
 Transform:
   m_ObjectHideFlags: 0

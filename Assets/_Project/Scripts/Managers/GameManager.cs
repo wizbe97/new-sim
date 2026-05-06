@@ -13,9 +13,11 @@ namespace Project.Managers
         [SerializeField] private PhoneManager phoneManagerPrefab;
         [SerializeField] private PlayerManager playerManagerPrefab;
         [SerializeField] private CameraManager cameraManagerPrefab;
+        [SerializeField] private ItemDeliveryManager itemDeliveryManagerPrefab;
 
         [Header("Scene References")]
         [SerializeField] private PlayerSpawnPoint playerSpawnPoint;
+        [SerializeField] private Transform itemDeliveryPad;
 
         private UIManager uiManager;
         private CursorManager cursorManager;
@@ -24,6 +26,7 @@ namespace Project.Managers
         private PhoneManager phoneManager;
         private PlayerManager playerManager;
         private CameraManager cameraManager;
+        private ItemDeliveryManager itemDeliveryManager;
 
         public UIManager UIManager => uiManager;
         public CursorManager CursorManager => cursorManager;
@@ -32,6 +35,7 @@ namespace Project.Managers
         public PhoneManager PhoneManager => phoneManager;
         public PlayerManager PlayerManager => playerManager;
         public CameraManager CameraManager => cameraManager;
+        public ItemDeliveryManager ItemDeliveryManager => itemDeliveryManager;
 
         private void Awake()
         {
@@ -40,6 +44,12 @@ namespace Project.Managers
             if (!HasRequiredManagers())
             {
                 Debug.LogError($"{nameof(GameManager)} failed to initialize because one or more required managers are missing.");
+                return;
+            }
+
+            if (!HasRequiredSceneReferences())
+            {
+                Debug.LogError($"{nameof(GameManager)} failed to initialize because one or more required scene references are missing.");
                 return;
             }
 
@@ -55,6 +65,7 @@ namespace Project.Managers
             phoneManager = SpawnManager(phoneManagerPrefab, nameof(PhoneManager));
             playerManager = SpawnManager(playerManagerPrefab, nameof(PlayerManager));
             cameraManager = SpawnManager(cameraManagerPrefab, nameof(CameraManager));
+            itemDeliveryManager = SpawnManager(itemDeliveryManagerPrefab, nameof(ItemDeliveryManager));
         }
 
         private bool HasRequiredManagers()
@@ -68,13 +79,34 @@ namespace Project.Managers
             hasRequiredManagers &= ValidateManager(phoneManager, nameof(PhoneManager));
             hasRequiredManagers &= ValidateManager(playerManager, nameof(PlayerManager));
             hasRequiredManagers &= ValidateManager(cameraManager, nameof(CameraManager));
+            hasRequiredManagers &= ValidateManager(itemDeliveryManager, nameof(ItemDeliveryManager));
 
             return hasRequiredManagers;
+        }
+
+        private bool HasRequiredSceneReferences()
+        {
+            bool hasRequiredSceneReferences = true;
+
+            if (playerSpawnPoint == null)
+            {
+                Debug.LogError($"{nameof(GameManager)} is missing Player Spawn Point scene reference.", this);
+                hasRequiredSceneReferences = false;
+            }
+
+            if (itemDeliveryPad == null)
+            {
+                Debug.LogError($"{nameof(GameManager)} is missing Item Delivery Pad scene reference.", this);
+                hasRequiredSceneReferences = false;
+            }
+
+            return hasRequiredSceneReferences;
         }
 
         private void InitializeManagers()
         {
             InitializeEconomy();
+            InitializeDelivery();
             InitializeUI();
             InitializePlayer();
             InitializeCamera();
@@ -88,9 +120,14 @@ namespace Project.Managers
             playerBalanceManager.Initialize();
         }
 
+        private void InitializeDelivery()
+        {
+            itemDeliveryManager.Initialize(itemDeliveryPad);
+        }
+
         private void InitializeUI()
         {
-            uiManager.Initialize(playerBalanceManager);
+            uiManager.Initialize(playerBalanceManager, itemDeliveryManager);
         }
 
         private void InitializePlayer()

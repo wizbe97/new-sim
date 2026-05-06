@@ -17,5 +17,7 @@ MonoBehaviour:
   itemDescription: A Simple Table
   itemType: 0
   itemIcon: {fileID: 10911, guid: 0000000000000000f000000000000000, type: 0}
+  placeablePrefab: {fileID: 7560830989778222333, guid: 2b12507603fb95644a6579bc979b3609, type: 3}
+  deliveryBoxPrefab: {fileID: 333770551778430285, guid: 8d7a7661a578a4342b7c79a03fa7a6fa, type: 3}
   price: 150
   isUniqueItem: 0

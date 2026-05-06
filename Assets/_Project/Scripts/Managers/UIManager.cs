@@ -20,6 +20,7 @@ namespace Project.Managers
         private BalanceDisplayView balanceDisplay;
         private PhoneView phone;
         private PlayerBalanceManager playerBalanceManager;
+        private ItemDeliveryManager itemDeliveryManager;
 
         public HUDView HUD => hud;
         public BalanceDisplayView BalanceDisplay => balanceDisplay;
@@ -29,7 +30,7 @@ namespace Project.Managers
         public event Action PhoneBackPressed;
         public event Action PhoneClosePressed;
 
-        public void Initialize(PlayerBalanceManager balanceManager)
+        public void Initialize(PlayerBalanceManager balanceManager, ItemDeliveryManager deliveryManager)
         {
             if (balanceManager == null)
             {
@@ -37,7 +38,14 @@ namespace Project.Managers
                 return;
             }
 
+            if (deliveryManager == null)
+            {
+                Debug.LogError($"{nameof(UIManager)} cannot initialize because ItemDeliveryManager is missing.");
+                return;
+            }
+
             playerBalanceManager = balanceManager;
+            itemDeliveryManager = deliveryManager;
 
             CreateHUD();
             CreateBalanceDisplay();
@@ -54,7 +62,6 @@ namespace Project.Managers
                 hud.SetReticleVisible(isVisible);
             }
 
-            // Balance should stay visible during phone/menu mode.
             if (balanceDisplay != null)
             {
                 balanceDisplay.gameObject.SetActive(true);
@@ -224,6 +231,24 @@ namespace Project.Managers
                 return;
             }
 
+            if (itemDeliveryManager == null)
+            {
+                Debug.LogError($"{nameof(UIManager)} cannot buy {storeItem.ItemName} because ItemDeliveryManager is missing.");
+                return;
+            }
+
+            if (storeItem.PlaceablePrefab == null)
+            {
+                Debug.LogError($"{storeItem.ItemName} cannot be bought because it has no Placeable Prefab assigned.", storeItem);
+                return;
+            }
+
+            if (storeItem.DeliveryBoxPrefab == null)
+            {
+                Debug.LogError($"{storeItem.ItemName} cannot be bought because it has no Delivery Box Prefab assigned.", storeItem);
+                return;
+            }
+
             if (!playerBalanceManager.CanAfford(storeItem.Price))
             {
                 Debug.Log(
@@ -242,12 +267,24 @@ namespace Project.Managers
                 return;
             }
 
+            bool deliveredSuccessfully = itemDeliveryManager.DeliverItem(storeItem);
+
+            if (!deliveredSuccessfully)
+            {
+                Debug.LogError(
+                    $"{storeItem.ItemName} was paid for, but delivery failed. " +
+                    $"You may want to refund the player here later."
+                );
+
+                return;
+            }
+
             if (phone != null)
             {
                 phone.MarkItemPurchased(storeItem);
             }
 
-            Debug.Log($"Bought {storeItem.ItemName} for ${storeItem.Price:N0}.");
+            Debug.Log($"Bought and delivered {storeItem.ItemName} for ${storeItem.Price:N0}.");
         }
 
         private void OnDestroy()
