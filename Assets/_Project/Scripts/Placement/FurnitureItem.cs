@@ -1,9 +1,14 @@
+using Project.Shop;
 using UnityEngine;
 
 namespace Project.Placement
 {
     public sealed class FurnitureItem : MonoBehaviour
     {
+        [Header("Shop Data")]
+        [Tooltip("The shop item this furniture represents. Required if this object should be boxable.")]
+        [SerializeField] private StoreItemSO storeItem;
+
         [Header("Placement")]
         [SerializeField, Min(0.1f)] private float maxPlacementDistance = 4f;
 
@@ -17,8 +22,14 @@ namespace Project.Placement
         [Tooltip("Only used if Use Explicit Preview Renderers is enabled.")]
         [SerializeField] private Renderer[] explicitPreviewRenderers;
 
+        public StoreItemSO StoreItem => storeItem;
         public float MaxPlacementDistance => maxPlacementDistance;
         public float SurfaceOffset => surfaceOffset;
+
+        public void SetStoreItem(StoreItemSO item)
+        {
+            storeItem = item;
+        }
 
         public Renderer[] GetPreviewRenderers()
         {

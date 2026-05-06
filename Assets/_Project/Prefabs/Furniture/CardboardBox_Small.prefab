@@ -147,6 +147,7 @@ GameObject:
   - component: {fileID: 211488172223213647}
   - component: {fileID: 333770551778430285}
   - component: {fileID: 2301576176667394351}
+  - component: {fileID: 1758582668682531789}
   m_Layer: 0
   m_Name: CardboardBox_Small
   m_TagString: Untagged
@@ -184,9 +185,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   storedItem: {fileID: 0}
-  itemSpawnPoint: {fileID: 6131694218458273747}
   destroyBoxWhenOpened: 1
-  unpackedItemSpawnOffset: {x: 0, y: 1, z: 0}
 --- !u!114 &2301576176667394351
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -199,3 +198,31 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7fdff3765b42de84b93b4d5a01c8b645, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  interactionPrompt: Pick up Box
+--- !u!54 &1758582668682531789
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4715500983767662781}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 0
+  m_Interpolate: 1
+  m_Constraints: 0
+  m_CollisionDetection: 2

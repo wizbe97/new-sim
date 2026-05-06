@@ -18,6 +18,7 @@ namespace Project.Input
 
         public event Action InteractPressed;
         public event Action RotatePressed;
+        public event Action PackPressed;
         public event Action CancelPressed;
         public event Action PhoneMenuPressed;
 
@@ -44,6 +45,7 @@ namespace Project.Input
 
             inputActions.Player.Interact.performed += OnInteractPerformed;
             inputActions.Player.Rotate.performed += OnRotatePerformed;
+            inputActions.Player.Pack.performed += OnPackPerformed;
             inputActions.Player.Cancel.performed += OnCancelPerformed;
             inputActions.Player.PhoneMenu.performed += OnPhoneMenuPerformed;
         }
@@ -64,6 +66,7 @@ namespace Project.Input
 
             inputActions.Player.Interact.performed -= OnInteractPerformed;
             inputActions.Player.Rotate.performed -= OnRotatePerformed;
+            inputActions.Player.Pack.performed -= OnPackPerformed;
             inputActions.Player.Cancel.performed -= OnCancelPerformed;
             inputActions.Player.PhoneMenu.performed -= OnPhoneMenuPerformed;
 
@@ -123,6 +126,11 @@ namespace Project.Input
         private void OnRotatePerformed(UnityEngine.InputSystem.InputAction.CallbackContext context)
         {
             RotatePressed?.Invoke();
+        }
+
+        private void OnPackPerformed(UnityEngine.InputSystem.InputAction.CallbackContext context)
+        {
+            PackPressed?.Invoke();
         }
 
         private void OnCancelPerformed(UnityEngine.InputSystem.InputAction.CallbackContext context)

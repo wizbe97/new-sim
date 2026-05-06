@@ -37,6 +37,10 @@ namespace Project.Managers
         public bool IsPlacing => currentSession != null;
         public bool CanPlace => IsPlacing && currentSession.CanPlace;
 
+        public FurnitureItem CurrentFurniture => currentSession != null
+            ? currentSession.Furniture
+            : null;
+
         private void Awake()
         {
             surfaceDetector = GetComponent<PlacementSurfaceDetector>();
@@ -113,6 +117,24 @@ namespace Project.Managers
             EvaluateCurrentPlacementWithoutMoving();
 
             Debug.Log($"Started placing {furniture.name}");
+        }
+
+        public FurnitureItem TakeCurrentFurnitureForBoxing()
+        {
+            if (!IsPlacing)
+            {
+                return null;
+            }
+
+            FurnitureItem furniture = currentSession.Furniture;
+
+            previewVisual.EndPreview();
+
+            Debug.Log($"Boxing up {furniture.name}");
+
+            currentSession = null;
+
+            return furniture;
         }
 
         private void UpdatePlacement()

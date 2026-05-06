@@ -14,6 +14,7 @@ namespace Project.Managers
         [SerializeField] private PlayerManager playerManagerPrefab;
         [SerializeField] private CameraManager cameraManagerPrefab;
         [SerializeField] private ItemDeliveryManager itemDeliveryManagerPrefab;
+        [SerializeField] private BoxCarryManager boxCarryManagerPrefab;
 
         [Header("Scene References")]
         [SerializeField] private PlayerSpawnPoint playerSpawnPoint;
@@ -27,6 +28,7 @@ namespace Project.Managers
         private PlayerManager playerManager;
         private CameraManager cameraManager;
         private ItemDeliveryManager itemDeliveryManager;
+        private BoxCarryManager boxCarryManager;
 
         public UIManager UIManager => uiManager;
         public CursorManager CursorManager => cursorManager;
@@ -36,6 +38,7 @@ namespace Project.Managers
         public PlayerManager PlayerManager => playerManager;
         public CameraManager CameraManager => cameraManager;
         public ItemDeliveryManager ItemDeliveryManager => itemDeliveryManager;
+        public BoxCarryManager BoxCarryManager => boxCarryManager;
 
         private void Awake()
         {
@@ -66,6 +69,7 @@ namespace Project.Managers
             playerManager = SpawnManager(playerManagerPrefab, nameof(PlayerManager));
             cameraManager = SpawnManager(cameraManagerPrefab, nameof(CameraManager));
             itemDeliveryManager = SpawnManager(itemDeliveryManagerPrefab, nameof(ItemDeliveryManager));
+            boxCarryManager = SpawnManager(boxCarryManagerPrefab, nameof(BoxCarryManager));
         }
 
         private bool HasRequiredManagers()
@@ -80,6 +84,7 @@ namespace Project.Managers
             hasRequiredManagers &= ValidateManager(playerManager, nameof(PlayerManager));
             hasRequiredManagers &= ValidateManager(cameraManager, nameof(CameraManager));
             hasRequiredManagers &= ValidateManager(itemDeliveryManager, nameof(ItemDeliveryManager));
+            hasRequiredManagers &= ValidateManager(boxCarryManager, nameof(BoxCarryManager));
 
             return hasRequiredManagers;
         }
@@ -113,6 +118,7 @@ namespace Project.Managers
             InitializePlacement();
             InitializeCursor();
             InitializePhone();
+            InitializeBoxCarry();
         }
 
         private void InitializeEconomy()
@@ -154,6 +160,11 @@ namespace Project.Managers
         private void InitializePhone()
         {
             phoneManager.Initialize(playerManager.CurrentPlayer, uiManager, cursorManager);
+        }
+
+        private void InitializeBoxCarry()
+        {
+            boxCarryManager.Initialize(playerManager.CurrentPlayer, placementManager);
         }
 
         private T SpawnManager<T>(T prefab, string managerName) where T : MonoBehaviour

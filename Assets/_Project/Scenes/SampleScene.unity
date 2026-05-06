@@ -563,6 +563,67 @@ MonoBehaviour:
   m_CameraActivatedEvent:
     m_PersistentCalls:
       m_Calls: []
+--- !u!1001 &1136845902
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 2604447119195495255, guid: 2f520fbb4387b6d4bbb28b6c934c1992, type: 3}
+      propertyPath: m_Name
+      value: ChairPrefab
+      objectReference: {fileID: 0}
+    - target: {fileID: 5411251812719322354, guid: 2f520fbb4387b6d4bbb28b6c934c1992, type: 3}
+      propertyPath: storeItem
+      value: 
+      objectReference: {fileID: 11400000, guid: 7e4d513703b8b0440bd80fead784c5cb, type: 2}
+    - target: {fileID: 6916122997140377608, guid: 2f520fbb4387b6d4bbb28b6c934c1992, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 5.4006624
+      objectReference: {fileID: 0}
+    - target: {fileID: 6916122997140377608, guid: 2f520fbb4387b6d4bbb28b6c934c1992, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.47
+      objectReference: {fileID: 0}
+    - target: {fileID: 6916122997140377608, guid: 2f520fbb4387b6d4bbb28b6c934c1992, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 8.14266
+      objectReference: {fileID: 0}
+    - target: {fileID: 6916122997140377608, guid: 2f520fbb4387b6d4bbb28b6c934c1992, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6916122997140377608, guid: 2f520fbb4387b6d4bbb28b6c934c1992, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6916122997140377608, guid: 2f520fbb4387b6d4bbb28b6c934c1992, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6916122997140377608, guid: 2f520fbb4387b6d4bbb28b6c934c1992, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6916122997140377608, guid: 2f520fbb4387b6d4bbb28b6c934c1992, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6916122997140377608, guid: 2f520fbb4387b6d4bbb28b6c934c1992, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6916122997140377608, guid: 2f520fbb4387b6d4bbb28b6c934c1992, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 2f520fbb4387b6d4bbb28b6c934c1992, type: 3}
 --- !u!1 &1678277869
 GameObject:
   m_ObjectHideFlags: 0
@@ -600,6 +661,7 @@ MonoBehaviour:
   playerManagerPrefab: {fileID: 5327621969224824429, guid: f0ab6bf2ec96c8748884c25d75f62888, type: 3}
   cameraManagerPrefab: {fileID: 6369030254122718112, guid: 49698b2bb77f1f24ba750a916efcf71f, type: 3}
   itemDeliveryManagerPrefab: {fileID: 6108589076616117238, guid: 19bd9b76ec240c24f84a1a69c5b8f100, type: 3}
+  boxCarryManagerPrefab: {fileID: 7996297473588392091, guid: f80b6b2f32e57ca4d85445a21a834da5, type: 3}
   playerSpawnPoint: {fileID: 185609790}
   itemDeliveryPad: {fileID: 1825613434}
 --- !u!4 &1678277871
@@ -733,3 +795,4 @@ SceneRoots:
   - {fileID: 431010277}
   - {fileID: 705507995}
   - {fileID: 1825613434}
+  - {fileID: 1136845902}

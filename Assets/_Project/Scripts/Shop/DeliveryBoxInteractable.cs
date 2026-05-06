@@ -1,26 +1,48 @@
+using Project.Interfaces;
+using Project.Managers;
 using UnityEngine;
 
 namespace Project.Shop
 {
     [RequireComponent(typeof(DeliveryBox))]
-    public sealed class DeliveryBoxInteractable : MonoBehaviour
+    public sealed class DeliveryBoxInteractable : MonoBehaviour, IInteractable
     {
+        [SerializeField] private string interactionPrompt = "Pick up Box";
+
         private DeliveryBox deliveryBox;
+        private BoxCarryManager boxCarryManager;
+
+        public string InteractionPrompt => interactionPrompt;
+
+        public bool CanInteract =>
+            deliveryBox != null &&
+            !deliveryBox.HasBeenOpened &&
+            boxCarryManager != null &&
+            !boxCarryManager.IsHoldingBox;
 
         private void Awake()
         {
             deliveryBox = GetComponent<DeliveryBox>();
         }
 
-        public void Open()
+        private void Start()
         {
-            if (deliveryBox == null)
+            boxCarryManager = FindFirstObjectByType<BoxCarryManager>();
+
+            if (boxCarryManager == null)
             {
-                Debug.LogError($"{nameof(DeliveryBoxInteractable)} on {name} is missing DeliveryBox.", this);
+                Debug.LogError($"{nameof(DeliveryBoxInteractable)} could not find {nameof(BoxCarryManager)}.", this);
+            }
+        }
+
+        public void Interact()
+        {
+            if (!CanInteract)
+            {
                 return;
             }
 
-            deliveryBox.OpenBox();
+            boxCarryManager.BeginCarry(deliveryBox);
         }
     }
 }
