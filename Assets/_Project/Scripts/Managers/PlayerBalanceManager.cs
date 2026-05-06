@@ -1,119 +1,110 @@
 using System;
 using Project.Economy;
-using Project.Events;
 using UnityEngine;
 
 namespace Project.Managers
 {
-    public class PlayerBalanceManager : MonoBehaviour
+    public sealed class PlayerBalanceManager : MonoBehaviour
     {
-        [Header("Balance Data")]
+        [Header("Balance Config")]
         [SerializeField] private PlayerBalanceSO playerBalance;
 
-        [Header("Events")]
-        [SerializeField] private GameEventSO balanceChangedEvent;
+        private int currentBalance;
 
         public event Action<int> BalanceChanged;
 
-        public int CurrentBalance
-        {
-            get
-            {
-                if (playerBalance == null)
-                {
-                    Debug.LogWarning("PlayerBalanceManager has no PlayerBalanceSO assigned.");
-                    return 0;
-                }
-
-                return playerBalance.CurrentBalance;
-            }
-        }
+        public int CurrentBalance => currentBalance;
 
         public void Initialize()
         {
             if (playerBalance == null)
             {
-                Debug.LogError("PlayerBalanceManager cannot initialize because PlayerBalanceSO is missing.");
+                Debug.LogError($"{nameof(PlayerBalanceManager)} cannot initialize because PlayerBalanceSO is missing.", this);
+                currentBalance = 0;
+                NotifyBalanceChanged();
                 return;
             }
 
-            playerBalance.ResetBalance();
+            currentBalance = Mathf.Max(0, playerBalance.StartingBalance);
             NotifyBalanceChanged();
 
-            Debug.Log($"PlayerBalanceManager initialized with balance: {playerBalance.CurrentBalance}");
+            Debug.Log($"{nameof(PlayerBalanceManager)} initialized with balance: {currentBalance}", this);
         }
 
         public bool CanAfford(int amount)
         {
-            if (playerBalance == null)
+            if (!IsValidAmount(amount, nameof(CanAfford)))
             {
-                Debug.LogWarning("Cannot check affordability because PlayerBalanceSO is missing.");
                 return false;
             }
 
-            return playerBalance.CanAfford(amount);
+            return currentBalance >= amount;
         }
 
-        public bool DeductBalance(int amount)
+        public bool TrySpend(int amount)
         {
-            if (playerBalance == null)
+            if (!IsValidAmount(amount, nameof(TrySpend)))
             {
-                Debug.LogWarning("Cannot deduct balance because PlayerBalanceSO is missing.");
                 return false;
             }
 
-            bool deducted = playerBalance.DeductBalance(amount);
-
-            if (!deducted)
+            if (!CanAfford(amount))
             {
-                Debug.Log($"Could not deduct {amount}. Current balance: {playerBalance.CurrentBalance}");
+                Debug.Log($"Could not spend {amount}. Current balance: {currentBalance}", this);
                 return false;
             }
 
+            currentBalance -= amount;
             NotifyBalanceChanged();
 
-            Debug.Log($"Deducted {amount}. New balance: {playerBalance.CurrentBalance}");
+            Debug.Log($"Spent {amount}. New balance: {currentBalance}", this);
             return true;
         }
 
         public void AddBalance(int amount)
         {
-            if (playerBalance == null)
+            if (!IsValidAmount(amount, nameof(AddBalance)))
             {
-                Debug.LogWarning("Cannot add balance because PlayerBalanceSO is missing.");
                 return;
             }
 
-            playerBalance.AddBalance(amount);
+            currentBalance += amount;
             NotifyBalanceChanged();
 
-            Debug.Log($"Added {amount}. New balance: {playerBalance.CurrentBalance}");
+            Debug.Log($"Added {amount}. New balance: {currentBalance}", this);
+        }
+
+        public void SetBalance(int amount)
+        {
+            currentBalance = Mathf.Max(0, amount);
+            NotifyBalanceChanged();
         }
 
         public void ResetBalance()
         {
-            if (playerBalance == null)
-            {
-                Debug.LogWarning("Cannot reset balance because PlayerBalanceSO is missing.");
-                return;
-            }
+            currentBalance = playerBalance != null
+                ? Mathf.Max(0, playerBalance.StartingBalance)
+                : 0;
 
-            playerBalance.ResetBalance();
             NotifyBalanceChanged();
 
-            Debug.Log($"Balance reset to: {playerBalance.CurrentBalance}");
+            Debug.Log($"Balance reset to: {currentBalance}", this);
+        }
+
+        private bool IsValidAmount(int amount, string methodName)
+        {
+            if (amount >= 0)
+            {
+                return true;
+            }
+
+            Debug.LogWarning($"{nameof(PlayerBalanceManager)}.{methodName} was called with a negative amount.", this);
+            return false;
         }
 
         private void NotifyBalanceChanged()
         {
-            int newBalance = playerBalance != null ? playerBalance.CurrentBalance : 0;
-
-            BalanceChanged?.Invoke(newBalance);
-
-            if (balanceChangedEvent != null)
-            {
-                balanceChangedEvent.Raise();
-            }
+            BalanceChanged?.Invoke(currentBalance);
         }
     }
 }

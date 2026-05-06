@@ -20,4 +20,4 @@ MonoBehaviour:
   placeablePrefab: {fileID: 2604447119195495255, guid: 2f520fbb4387b6d4bbb28b6c934c1992, type: 3}
   deliveryBoxPrefab: {fileID: 8739386040333015713, guid: a08c8ddb1e3bc02408af74962cac31d3, type: 3}
   price: 100
-  isUniqueItem: 0
+  isUniqueItem: 1

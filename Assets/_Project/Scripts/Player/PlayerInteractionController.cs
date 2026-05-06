@@ -1,5 +1,6 @@
 using Project.Input;
 using Project.Interfaces;
+using Project.Placement;
 using Project.Managers;
 using UnityEngine;
 
@@ -21,7 +22,7 @@ namespace Project.Player
 
         private PlayerInputHandler input;
         private UIManager uiManager;
-        private PlacementManager placementManager;
+        private BuildingManager buildingManager;
         private IInteractable currentInteractable;
 
         private bool canInteract = true;
@@ -35,7 +36,7 @@ namespace Project.Player
 
             if (interactionOrigin == null)
             {
-                Debug.LogError($"{nameof(PlayerInteractionController)} on {name} is missing Interaction Origin.");
+                Debug.LogError($"{nameof(PlayerInteractionController)} on {name} is missing Interaction Origin.", this);
             }
         }
 
@@ -60,10 +61,10 @@ namespace Project.Player
             UpdateCurrentInteractable();
         }
 
-        public void Initialize(UIManager newUIManager, PlacementManager newPlacementManager)
+        public void Initialize(UIManager newUIManager, BuildingManager newBuildingManager)
         {
             uiManager = newUIManager;
-            placementManager = newPlacementManager;
+            buildingManager = newBuildingManager;
 
             UpdateReticleState();
         }
@@ -83,7 +84,7 @@ namespace Project.Player
             IInteractable previousInteractable = currentInteractable;
             currentInteractable = null;
 
-            if (placementManager != null && placementManager.IsPlacing)
+            if (buildingManager != null && buildingManager.IsBuilding)
             {
                 UpdateReticleStateIfChanged(previousInteractable);
                 return;
@@ -165,7 +166,7 @@ namespace Project.Player
                 return;
             }
 
-            if (placementManager != null && placementManager.IsPlacing)
+            if (buildingManager != null && buildingManager.IsBuilding)
             {
                 return;
             }

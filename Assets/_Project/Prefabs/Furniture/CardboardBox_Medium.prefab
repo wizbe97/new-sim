@@ -117,6 +117,7 @@ GameObject:
   - component: {fileID: 8739386040333015713}
   - component: {fileID: 5496367602814941552}
   - component: {fileID: -6715738982808023693}
+  - component: {fileID: 6064587372398533261}
   m_Layer: 0
   m_Name: CardboardBox_Medium
   m_TagString: Untagged
@@ -192,9 +193,26 @@ Rigidbody:
   m_ImplicitTensor: 1
   m_UseGravity: 1
   m_IsKinematic: 0
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_Constraints: 0
-  m_CollisionDetection: 0
+  m_CollisionDetection: 2
+--- !u!114 &6064587372398533261
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4289548018019117726}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a1a5c6b07930909419b2d182d480e2e3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  forceGravityOnDrop: 1
+  forceNonKinematicOnDrop: 1
+  forceCollisionsOnDrop: 1
+  droppedCollisionDetectionMode: 2
+  droppedInterpolation: 1
 --- !u!1 &5558926083329774116
 GameObject:
   m_ObjectHideFlags: 0

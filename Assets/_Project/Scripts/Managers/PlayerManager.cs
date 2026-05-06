@@ -1,4 +1,4 @@
-using Project.Player;
+using Project.Placement;
 using Project.Spawning;
 using UnityEngine;
 
@@ -7,18 +7,18 @@ namespace Project.Managers
     public sealed class PlayerManager : MonoBehaviour
     {
         [Header("Player")]
-        [SerializeField] private FirstPersonController playerPrefab;
+        [SerializeField] private Project.Player.FirstPersonController playerPrefab;
 
         [Header("Spawn")]
         [SerializeField] private PlayerSpawnPoint fallbackSpawnPoint;
 
-        private FirstPersonController currentPlayer;
+        private Project.Player.FirstPersonController currentPlayer;
 
-        public FirstPersonController CurrentPlayer => currentPlayer;
+        public Project.Player.FirstPersonController CurrentPlayer => currentPlayer;
 
-        public void Initialize(UIManager uiManager, PlacementManager placementManager)
+        public void Initialize(UIManager uiManager, BuildingManager buildingManager)
         {
-            SpawnPlayer(uiManager, placementManager);
+            SpawnPlayer(uiManager, buildingManager);
         }
 
         public void SetFallbackSpawnPoint(PlayerSpawnPoint spawnPoint)
@@ -26,11 +26,11 @@ namespace Project.Managers
             fallbackSpawnPoint = spawnPoint;
         }
 
-        private void SpawnPlayer(UIManager uiManager, PlacementManager placementManager)
+        private void SpawnPlayer(UIManager uiManager, BuildingManager buildingManager)
         {
             if (playerPrefab == null)
             {
-                Debug.LogError($"{nameof(PlayerManager)} is missing a player prefab.");
+                Debug.LogError($"{nameof(PlayerManager)} is missing a player prefab.", this);
                 return;
             }
 
@@ -52,16 +52,16 @@ namespace Project.Managers
 
             currentPlayer.name = "Player";
 
-            PlayerInteractionController interactionController =
-                currentPlayer.GetComponent<PlayerInteractionController>();
+            Project.Player.PlayerInteractionController interactionController =
+                currentPlayer.GetComponent<Project.Player.PlayerInteractionController>();
 
             if (interactionController != null)
             {
-                interactionController.Initialize(uiManager, placementManager);
+                interactionController.Initialize(uiManager, buildingManager);
             }
             else
             {
-                Debug.LogWarning($"{nameof(PlayerManager)} spawned a player without a {nameof(PlayerInteractionController)}.");
+                Debug.LogWarning($"{nameof(PlayerManager)} spawned a player without a PlayerInteractionController.", currentPlayer);
             }
         }
 
@@ -76,7 +76,7 @@ namespace Project.Managers
 
             if (sceneSpawnPoint == null)
             {
-                Debug.LogWarning($"{nameof(PlayerManager)} could not find a PlayerSpawnPoint. Player will spawn at world origin.");
+                Debug.LogWarning($"{nameof(PlayerManager)} could not find a PlayerSpawnPoint. Player will spawn at world origin.", this);
             }
 
             return sceneSpawnPoint;

@@ -619,7 +619,8 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 4849770188485271952, guid: 2f520fbb4387b6d4bbb28b6c934c1992, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []
@@ -655,13 +656,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   uiManagerPrefab: {fileID: 1233964865282260171, guid: bffb9f9a7cb0c21419d29d3401561465, type: 3}
   cursorManagerPrefab: {fileID: 1996935886724501756, guid: 9dd59a13c8dabf34ab95484f137bca49, type: 3}
-  placementManagerPrefab: {fileID: 735952708839536412, guid: 4c2465618c8be9b43bdbf3d0a4ed50ad, type: 3}
+  buildingManagerPrefab: {fileID: 735952708839536412, guid: 4c2465618c8be9b43bdbf3d0a4ed50ad, type: 3}
   playerBalanceManagerPrefab: {fileID: 2481173703993817188, guid: 3c87ad424aa7ddd4ea1791e7205bd8a0, type: 3}
   phoneManagerPrefab: {fileID: 7859518817601130054, guid: a5a83218de6cd6b4b8c157bf24456fe3, type: 3}
   playerManagerPrefab: {fileID: 5327621969224824429, guid: f0ab6bf2ec96c8748884c25d75f62888, type: 3}
   cameraManagerPrefab: {fileID: 6369030254122718112, guid: 49698b2bb77f1f24ba750a916efcf71f, type: 3}
   itemDeliveryManagerPrefab: {fileID: 6108589076616117238, guid: 19bd9b76ec240c24f84a1a69c5b8f100, type: 3}
-  boxCarryManagerPrefab: {fileID: 7996297473588392091, guid: f80b6b2f32e57ca4d85445a21a834da5, type: 3}
+  inHandManagerPrefab: {fileID: 8327629289913732408, guid: f80b6b2f32e57ca4d85445a21a834da5, type: 3}
+  shopPurchaseServicePrefab: {fileID: 9070937719740875221, guid: 3b9c346f61d900a4a89782fc98ad7925, type: 3}
+  shopUIControllerPrefab: {fileID: 6342151617859082758, guid: e0362cd4e79b00c4eb17d7df50983937, type: 3}
   playerSpawnPoint: {fileID: 185609790}
   itemDeliveryPad: {fileID: 1825613434}
 --- !u!4 &1678277871

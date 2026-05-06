@@ -1,5 +1,5 @@
+using Project.Hands;
 using Project.Interfaces;
-using Project.Managers;
 using UnityEngine;
 
 namespace Project.Placement
@@ -10,13 +10,14 @@ namespace Project.Placement
         [SerializeField] private string interactionPrompt = "Pick up Furniture";
 
         private FurnitureItem furnitureItem;
-        private PlacementManager placementManager;
+        private InHandManager inHandManager;
 
         public string InteractionPrompt => interactionPrompt;
 
         public bool CanInteract =>
-            placementManager != null &&
-            !placementManager.IsPlacing;
+            furnitureItem != null &&
+            inHandManager != null &&
+            !inHandManager.IsHoldingSomething;
 
         private void Awake()
         {
@@ -25,11 +26,11 @@ namespace Project.Placement
 
         private void Start()
         {
-            placementManager = FindFirstObjectByType<PlacementManager>();
+            inHandManager = FindFirstObjectByType<InHandManager>();
 
-            if (placementManager == null)
+            if (inHandManager == null)
             {
-                Debug.LogError($"{nameof(FurnitureInteractable)} could not find PlacementManager.");
+                Debug.LogError($"{nameof(FurnitureInteractable)} could not find {nameof(InHandManager)}.", this);
             }
         }
 
@@ -40,7 +41,7 @@ namespace Project.Placement
                 return;
             }
 
-            placementManager.BeginPlacement(furnitureItem);
+            inHandManager.TryPickupFurniture(furnitureItem);
         }
     }
 }

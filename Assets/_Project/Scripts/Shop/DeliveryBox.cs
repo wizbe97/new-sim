@@ -16,6 +16,8 @@ namespace Project.Shop
         public StoreItemSO StoredItem => storedItem;
         public bool HasBeenOpened => hasBeenOpened;
 
+        public bool CanCarry => !hasBeenOpened;
+
         public bool CanOpen =>
             !hasBeenOpened &&
             storedItem != null &&
@@ -66,14 +68,7 @@ namespace Project.Shop
 
             spawnedItem.name = storedItem.ItemName;
 
-            StoreItemInstance instance = spawnedItem.GetComponent<StoreItemInstance>();
-
-            if (instance == null)
-            {
-                instance = spawnedItem.AddComponent<StoreItemInstance>();
-            }
-
-            instance.Initialize(storedItem);
+            ValidateSpawnedFurnitureHasNoRigidbody(spawnedItem);
 
             FurnitureItem furnitureItem = spawnedItem.GetComponent<FurnitureItem>();
 
@@ -90,6 +85,27 @@ namespace Project.Shop
             }
 
             return spawnedItem;
+        }
+
+        private void ValidateSpawnedFurnitureHasNoRigidbody(GameObject spawnedItem)
+        {
+            if (spawnedItem == null)
+            {
+                return;
+            }
+
+            Rigidbody rigidbody = spawnedItem.GetComponentInChildren<Rigidbody>(true);
+
+            if (rigidbody == null)
+            {
+                return;
+            }
+
+            Debug.LogError(
+                $"{storedItem.ItemName} was unpacked with a Rigidbody on '{rigidbody.name}'. " +
+                "Placeable furniture prefabs should not have Rigidbody components. Remove it from the Placeable Prefab.",
+                rigidbody
+            );
         }
     }
 }

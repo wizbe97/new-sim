@@ -33,7 +33,8 @@ namespace Project.UI
         public event Action<StoreItemSO> ShopItemBuyClicked;
 
         private readonly List<ShopItemButtonView> spawnedShopItems = new();
-        private readonly HashSet<StoreItemSO> ownedUniqueItems = new();
+
+        private Func<StoreItemSO, bool> ownershipProvider;
 
         private void Awake()
         {
@@ -75,11 +76,17 @@ namespace Project.UI
             ClearShopItems();
         }
 
+        public void SetOwnershipProvider(Func<StoreItemSO, bool> provider)
+        {
+            ownershipProvider = provider;
+            RefreshShopItems();
+        }
+
         public void Show()
         {
             if (phoneRoot == null)
             {
-                Debug.LogError($"{nameof(PhoneView)} on {name} is missing Phone Root.");
+                Debug.LogError($"{nameof(PhoneView)} on {name} is missing Phone Root.", this);
                 return;
             }
 
@@ -90,7 +97,7 @@ namespace Project.UI
         {
             if (phoneRoot == null)
             {
-                Debug.LogError($"{nameof(PhoneView)} on {name} is missing Phone Root.");
+                Debug.LogError($"{nameof(PhoneView)} on {name} is missing Phone Root.", this);
                 return;
             }
 
@@ -108,26 +115,17 @@ namespace Project.UI
             RefreshShopItems();
         }
 
-        public void MarkItemPurchased(StoreItemSO storeItem)
+        public void RefreshShopItems()
         {
-            if (storeItem == null)
+            foreach (ShopItemButtonView itemView in spawnedShopItems)
             {
-                return;
+                if (itemView == null || itemView.StoreItem == null)
+                {
+                    continue;
+                }
+
+                itemView.SetOwned(IsOwned(itemView.StoreItem));
             }
-
-            if (storeItem.IsUniqueItem)
-            {
-                ownedUniqueItems.Add(storeItem);
-            }
-
-            RefreshShopItems();
-        }
-
-        public bool IsUniqueItemOwned(StoreItemSO storeItem)
-        {
-            return storeItem != null &&
-                   storeItem.IsUniqueItem &&
-                   ownedUniqueItems.Contains(storeItem);
         }
 
         public void RebuildShop()
@@ -139,13 +137,13 @@ namespace Project.UI
         {
             if (homePageRoot == null)
             {
-                Debug.LogError($"{nameof(PhoneView)} on {name} is missing Home Page Root.");
+                Debug.LogError($"{nameof(PhoneView)} on {name} is missing Home Page Root.", this);
                 return;
             }
 
             if (shopPageRoot == null)
             {
-                Debug.LogError($"{nameof(PhoneView)} on {name} is missing Shop Page Root.");
+                Debug.LogError($"{nameof(PhoneView)} on {name} is missing Shop Page Root.", this);
                 return;
             }
 
@@ -159,19 +157,19 @@ namespace Project.UI
 
             if (shopCatalogue == null)
             {
-                Debug.LogError($"{nameof(PhoneView)} on {name} is missing Shop Catalogue.");
+                Debug.LogError($"{nameof(PhoneView)} on {name} is missing Shop Catalogue.", this);
                 return;
             }
 
             if (shopItemButtonPrefab == null)
             {
-                Debug.LogError($"{nameof(PhoneView)} on {name} is missing Shop Item Button Prefab.");
+                Debug.LogError($"{nameof(PhoneView)} on {name} is missing Shop Item Button Prefab.", this);
                 return;
             }
 
             if (shopItemsContentRoot == null)
             {
-                Debug.LogError($"{nameof(PhoneView)} on {name} is missing Shop Items Content Root.");
+                Debug.LogError($"{nameof(PhoneView)} on {name} is missing Shop Items Content Root.", this);
                 return;
             }
 
@@ -184,7 +182,7 @@ namespace Project.UI
 
                 ShopItemButtonView itemView = Instantiate(shopItemButtonPrefab, shopItemsContentRoot);
                 itemView.name = $"ShopItemButton_{item.ItemName}";
-                itemView.Initialize(item, IsUniqueItemOwned(item));
+                itemView.Initialize(item, IsOwned(item));
                 itemView.BuyPressed += HandleShopItemBuyPressed;
 
                 spawnedShopItems.Add(itemView);
@@ -209,17 +207,9 @@ namespace Project.UI
             spawnedShopItems.Clear();
         }
 
-        private void RefreshShopItems()
+        private bool IsOwned(StoreItemSO storeItem)
         {
-            foreach (ShopItemButtonView itemView in spawnedShopItems)
-            {
-                if (itemView == null || itemView.StoreItem == null)
-                {
-                    continue;
-                }
-
-                itemView.SetOwned(IsUniqueItemOwned(itemView.StoreItem));
-            }
+            return ownershipProvider != null && ownershipProvider.Invoke(storeItem);
         }
 
         private void HandleShopAppClicked()

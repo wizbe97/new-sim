@@ -1,5 +1,5 @@
+using Project.Hands;
 using Project.Interfaces;
-using Project.Managers;
 using UnityEngine;
 
 namespace Project.Shop
@@ -10,15 +10,15 @@ namespace Project.Shop
         [SerializeField] private string interactionPrompt = "Pick up Box";
 
         private DeliveryBox deliveryBox;
-        private BoxCarryManager boxCarryManager;
+        private InHandManager inHandManager;
 
         public string InteractionPrompt => interactionPrompt;
 
         public bool CanInteract =>
             deliveryBox != null &&
-            !deliveryBox.HasBeenOpened &&
-            boxCarryManager != null &&
-            !boxCarryManager.IsHoldingBox;
+            deliveryBox.CanCarry &&
+            inHandManager != null &&
+            !inHandManager.IsHoldingSomething;
 
         private void Awake()
         {
@@ -27,11 +27,11 @@ namespace Project.Shop
 
         private void Start()
         {
-            boxCarryManager = FindFirstObjectByType<BoxCarryManager>();
+            inHandManager = FindFirstObjectByType<InHandManager>();
 
-            if (boxCarryManager == null)
+            if (inHandManager == null)
             {
-                Debug.LogError($"{nameof(DeliveryBoxInteractable)} could not find {nameof(BoxCarryManager)}.", this);
+                Debug.LogError($"{nameof(DeliveryBoxInteractable)} could not find {nameof(InHandManager)}.", this);
             }
         }
 
@@ -42,7 +42,7 @@ namespace Project.Shop
                 return;
             }
 
-            boxCarryManager.BeginCarry(deliveryBox);
+            inHandManager.TryPickupBox(deliveryBox);
         }
     }
 }

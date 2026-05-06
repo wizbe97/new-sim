@@ -1,3 +1,7 @@
+using System;
+using Project.Hands;
+using Project.Placement;
+using Project.Shop;
 using Project.Spawning;
 using UnityEngine;
 
@@ -8,13 +12,15 @@ namespace Project.Managers
         [Header("Manager Prefabs")]
         [SerializeField] private UIManager uiManagerPrefab;
         [SerializeField] private CursorManager cursorManagerPrefab;
-        [SerializeField] private PlacementManager placementManagerPrefab;
+        [SerializeField] private BuildingManager buildingManagerPrefab;
         [SerializeField] private PlayerBalanceManager playerBalanceManagerPrefab;
         [SerializeField] private PhoneManager phoneManagerPrefab;
         [SerializeField] private PlayerManager playerManagerPrefab;
         [SerializeField] private CameraManager cameraManagerPrefab;
         [SerializeField] private ItemDeliveryManager itemDeliveryManagerPrefab;
-        [SerializeField] private BoxCarryManager boxCarryManagerPrefab;
+        [SerializeField] private InHandManager inHandManagerPrefab;
+        [SerializeField] private ShopPurchaseService shopPurchaseServicePrefab;
+        [SerializeField] private ShopUIController shopUIControllerPrefab;
 
         [Header("Scene References")]
         [SerializeField] private PlayerSpawnPoint playerSpawnPoint;
@@ -22,23 +28,27 @@ namespace Project.Managers
 
         private UIManager uiManager;
         private CursorManager cursorManager;
-        private PlacementManager placementManager;
+        private BuildingManager buildingManager;
         private PlayerBalanceManager playerBalanceManager;
         private PhoneManager phoneManager;
         private PlayerManager playerManager;
         private CameraManager cameraManager;
         private ItemDeliveryManager itemDeliveryManager;
-        private BoxCarryManager boxCarryManager;
+        private InHandManager inHandManager;
+        private ShopPurchaseService shopPurchaseService;
+        private ShopUIController shopUIController;
 
         public UIManager UIManager => uiManager;
         public CursorManager CursorManager => cursorManager;
-        public PlacementManager PlacementManager => placementManager;
+        public BuildingManager BuildingManager => buildingManager;
         public PlayerBalanceManager PlayerBalanceManager => playerBalanceManager;
         public PhoneManager PhoneManager => phoneManager;
         public PlayerManager PlayerManager => playerManager;
         public CameraManager CameraManager => cameraManager;
         public ItemDeliveryManager ItemDeliveryManager => itemDeliveryManager;
-        public BoxCarryManager BoxCarryManager => boxCarryManager;
+        public InHandManager InHandManager => inHandManager;
+        public ShopPurchaseService ShopPurchaseService => shopPurchaseService;
+        public ShopUIController ShopUIController => shopUIController;
 
         private void Awake()
         {
@@ -46,13 +56,13 @@ namespace Project.Managers
 
             if (!HasRequiredManagers())
             {
-                Debug.LogError($"{nameof(GameManager)} failed to initialize because one or more required managers are missing.");
+                Debug.LogError($"{nameof(GameManager)} failed to initialize because one or more required managers are missing.", this);
                 return;
             }
 
             if (!HasRequiredSceneReferences())
             {
-                Debug.LogError($"{nameof(GameManager)} failed to initialize because one or more required scene references are missing.");
+                Debug.LogError($"{nameof(GameManager)} failed to initialize because one or more required scene references are missing.", this);
                 return;
             }
 
@@ -63,13 +73,44 @@ namespace Project.Managers
         {
             uiManager = SpawnManager(uiManagerPrefab, nameof(UIManager));
             cursorManager = SpawnManager(cursorManagerPrefab, nameof(CursorManager));
-            placementManager = SpawnManager(placementManagerPrefab, nameof(PlacementManager));
+            buildingManager = SpawnManager(buildingManagerPrefab, nameof(BuildingManager));
             playerBalanceManager = SpawnManager(playerBalanceManagerPrefab, nameof(PlayerBalanceManager));
             phoneManager = SpawnManager(phoneManagerPrefab, nameof(PhoneManager));
             playerManager = SpawnManager(playerManagerPrefab, nameof(PlayerManager));
             cameraManager = SpawnManager(cameraManagerPrefab, nameof(CameraManager));
             itemDeliveryManager = SpawnManager(itemDeliveryManagerPrefab, nameof(ItemDeliveryManager));
-            boxCarryManager = SpawnManager(boxCarryManagerPrefab, nameof(BoxCarryManager));
+            inHandManager = SpawnManager(inHandManagerPrefab, nameof(InHandManager));
+            shopPurchaseService = SpawnManager(shopPurchaseServicePrefab, nameof(ShopPurchaseService));
+            shopUIController = SpawnManager(shopUIControllerPrefab, nameof(ShopUIController));
+        }
+
+        private void InitializeManagers()
+        {
+            Action[] initializationSteps =
+            {
+                () => playerBalanceManager.Initialize(),
+                () => itemDeliveryManager.Initialize(itemDeliveryPad),
+                () => shopPurchaseService.Initialize(playerBalanceManager, itemDeliveryManager),
+                () => uiManager.Initialize(playerBalanceManager),
+                () => shopUIController.Initialize(uiManager, shopPurchaseService),
+
+                () =>
+                {
+                    playerManager.SetFallbackSpawnPoint(playerSpawnPoint);
+                    playerManager.Initialize(uiManager, buildingManager);
+                },
+
+                () => cameraManager.Initialize(playerManager.CurrentPlayer),
+                () => buildingManager.Initialize(playerManager.CurrentPlayer),
+                () => cursorManager.Initialize(uiManager),
+                () => phoneManager.Initialize(playerManager.CurrentPlayer, uiManager, cursorManager),
+                () => inHandManager.Initialize(playerManager.CurrentPlayer, buildingManager)
+            };
+
+            foreach (Action initializeStep in initializationSteps)
+            {
+                initializeStep.Invoke();
+            }
         }
 
         private bool HasRequiredManagers()
@@ -78,13 +119,15 @@ namespace Project.Managers
 
             hasRequiredManagers &= ValidateManager(uiManager, nameof(UIManager));
             hasRequiredManagers &= ValidateManager(cursorManager, nameof(CursorManager));
-            hasRequiredManagers &= ValidateManager(placementManager, nameof(PlacementManager));
+            hasRequiredManagers &= ValidateManager(buildingManager, nameof(BuildingManager));
             hasRequiredManagers &= ValidateManager(playerBalanceManager, nameof(PlayerBalanceManager));
             hasRequiredManagers &= ValidateManager(phoneManager, nameof(PhoneManager));
             hasRequiredManagers &= ValidateManager(playerManager, nameof(PlayerManager));
             hasRequiredManagers &= ValidateManager(cameraManager, nameof(CameraManager));
             hasRequiredManagers &= ValidateManager(itemDeliveryManager, nameof(ItemDeliveryManager));
-            hasRequiredManagers &= ValidateManager(boxCarryManager, nameof(BoxCarryManager));
+            hasRequiredManagers &= ValidateManager(inHandManager, nameof(InHandManager));
+            hasRequiredManagers &= ValidateManager(shopPurchaseService, nameof(ShopPurchaseService));
+            hasRequiredManagers &= ValidateManager(shopUIController, nameof(ShopUIController));
 
             return hasRequiredManagers;
         }
@@ -108,70 +151,11 @@ namespace Project.Managers
             return hasRequiredSceneReferences;
         }
 
-        private void InitializeManagers()
-        {
-            InitializeEconomy();
-            InitializeDelivery();
-            InitializeUI();
-            InitializePlayer();
-            InitializeCamera();
-            InitializePlacement();
-            InitializeCursor();
-            InitializePhone();
-            InitializeBoxCarry();
-        }
-
-        private void InitializeEconomy()
-        {
-            playerBalanceManager.Initialize();
-        }
-
-        private void InitializeDelivery()
-        {
-            itemDeliveryManager.Initialize(itemDeliveryPad);
-        }
-
-        private void InitializeUI()
-        {
-            uiManager.Initialize(playerBalanceManager, itemDeliveryManager);
-        }
-
-        private void InitializePlayer()
-        {
-            playerManager.SetFallbackSpawnPoint(playerSpawnPoint);
-            playerManager.Initialize(uiManager, placementManager);
-        }
-
-        private void InitializeCamera()
-        {
-            cameraManager.Initialize(playerManager.CurrentPlayer);
-        }
-
-        private void InitializePlacement()
-        {
-            placementManager.Initialize(playerManager.CurrentPlayer);
-        }
-
-        private void InitializeCursor()
-        {
-            cursorManager.Initialize(uiManager);
-        }
-
-        private void InitializePhone()
-        {
-            phoneManager.Initialize(playerManager.CurrentPlayer, uiManager, cursorManager);
-        }
-
-        private void InitializeBoxCarry()
-        {
-            boxCarryManager.Initialize(playerManager.CurrentPlayer, placementManager);
-        }
-
         private T SpawnManager<T>(T prefab, string managerName) where T : MonoBehaviour
         {
             if (prefab == null)
             {
-                Debug.LogError($"{nameof(GameManager)} is missing {managerName} prefab.");
+                Debug.LogError($"{nameof(GameManager)} is missing {managerName} prefab.", this);
                 return null;
             }
 
@@ -188,7 +172,7 @@ namespace Project.Managers
                 return true;
             }
 
-            Debug.LogError($"{nameof(GameManager)} cannot initialize because {managerName} is missing.");
+            Debug.LogError($"{nameof(GameManager)} cannot initialize because {managerName} is missing.", this);
             return false;
         }
     }
