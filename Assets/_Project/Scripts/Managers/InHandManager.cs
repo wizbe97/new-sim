@@ -11,7 +11,6 @@ namespace Project.Hands
         [Header("Box Hold Transform")]
         [SerializeField] private Vector3 heldBoxLocalPosition = new Vector3(0f, -0.35f, 1f);
         [SerializeField] private Vector3 heldBoxLocalEulerAngles = Vector3.zero;
-        [SerializeField] private Vector3 heldBoxLocalScale = Vector3.one;
 
         [Header("Box Unpacking")]
         [SerializeField] private float unpackForwardOffset = 1.25f;
@@ -28,6 +27,7 @@ namespace Project.Hands
         private Transform heldBoxPoint;
         private DeliveryBox heldBox;
         private CarryablePhysics heldBoxPhysics;
+        private Vector3 heldBoxOriginalLocalScale = Vector3.one;
 
         private InHandItemType currentItemType = InHandItemType.None;
         private int handStateStartedFrame = -1;
@@ -111,6 +111,8 @@ namespace Project.Hands
             }
 
             heldBox = deliveryBox;
+            heldBoxOriginalLocalScale = heldBox.transform.localScale;
+
             heldBoxPhysics = heldBox.GetComponent<CarryablePhysics>();
 
             if (heldBoxPhysics == null)
@@ -215,6 +217,7 @@ namespace Project.Hands
             }
 
             FurnitureItem furnitureItem = unpackedObject.GetComponentInChildren<FurnitureItem>(true);
+
             if (furnitureItem == null)
             {
                 Debug.LogWarning(
@@ -281,7 +284,6 @@ namespace Project.Hands
             }
 
             StoreItemSO storeItem = GetStoreItemForFurniture(furniture);
-            
 
             if (storeItem == null)
             {
@@ -330,7 +332,10 @@ namespace Project.Hands
 
             ClearHandState();
 
-            Debug.Log($"Packed {storeItem.ItemName} back into a box.", newBox);
+            Debug.Log(
+                $"Packed {storeItem.ItemName} into box prefab '{storeItem.DeliveryBoxPrefab.name}'.",
+                newBox
+            );
 
             if (holdBoxAfterPackingFurniture)
             {
@@ -462,7 +467,7 @@ namespace Project.Hands
 
             heldBox.transform.localPosition = Vector3.zero;
             heldBox.transform.localRotation = Quaternion.identity;
-            heldBox.transform.localScale = heldBoxLocalScale;
+            heldBox.transform.localScale = heldBoxOriginalLocalScale;
         }
 
         private Vector3 GetUnpackedItemSpawnPosition()
@@ -491,6 +496,7 @@ namespace Project.Hands
         {
             heldBox = null;
             heldBoxPhysics = null;
+            heldBoxOriginalLocalScale = Vector3.one;
         }
 
         private StoreItemSO GetStoreItemForFurniture(FurnitureItem furniture)
