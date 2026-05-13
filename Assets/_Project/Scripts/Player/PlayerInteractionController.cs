@@ -24,10 +24,12 @@ namespace Project.Player
         private UIManager uiManager;
         private BuildingManager buildingManager;
         private IInteractable currentInteractable;
+        private ISecondaryInteractable currentSecondaryInteractable;
 
         private bool canInteract = true;
 
         public IInteractable CurrentInteractable => currentInteractable;
+        public ISecondaryInteractable CurrentSecondaryInteractable => currentSecondaryInteractable;
         public bool CanInteract => canInteract;
 
         private void Awake()
@@ -43,22 +45,24 @@ namespace Project.Player
         private void OnEnable()
         {
             input.InteractPressed += HandleInteractPressed;
+            input.SecondaryInteractPressed += HandleSecondaryInteractPressed;
         }
 
         private void OnDisable()
         {
             input.InteractPressed -= HandleInteractPressed;
+            input.SecondaryInteractPressed -= HandleSecondaryInteractPressed;
         }
 
         private void Update()
         {
             if (!canInteract)
             {
-                ClearCurrentInteractable();
+                ClearCurrentInteractables();
                 return;
             }
 
-            UpdateCurrentInteractable();
+            UpdateCurrentInteractables();
         }
 
         public void Initialize(UIManager newUIManager, BuildingManager newBuildingManager)
@@ -75,24 +79,27 @@ namespace Project.Player
 
             if (!canInteract)
             {
-                ClearCurrentInteractable();
+                ClearCurrentInteractables();
             }
         }
 
-        private void UpdateCurrentInteractable()
+        private void UpdateCurrentInteractables()
         {
             IInteractable previousInteractable = currentInteractable;
+            ISecondaryInteractable previousSecondaryInteractable = currentSecondaryInteractable;
+
             currentInteractable = null;
+            currentSecondaryInteractable = null;
 
             if (buildingManager != null && buildingManager.IsBuilding)
             {
-                UpdateReticleStateIfChanged(previousInteractable);
+                UpdateReticleStateIfChanged(previousInteractable, previousSecondaryInteractable);
                 return;
             }
 
             if (interactionOrigin == null)
             {
-                UpdateReticleStateIfChanged(previousInteractable);
+                UpdateReticleStateIfChanged(previousInteractable, previousSecondaryInteractable);
                 return;
             }
 
@@ -114,34 +121,57 @@ namespace Project.Player
                     interactionLayerMask,
                     triggerInteraction))
             {
-                if (!hit.collider.TryGetComponent(out IInteractable interactable))
-                {
-                    interactable = hit.collider.GetComponentInParent<IInteractable>();
-                }
-
-                if (interactable != null && interactable.CanInteract)
-                {
-                    currentInteractable = interactable;
-                }
+                ResolvePrimaryInteractable(hit);
+                ResolveSecondaryInteractable(hit);
             }
 
-            UpdateReticleStateIfChanged(previousInteractable);
+            UpdateReticleStateIfChanged(previousInteractable, previousSecondaryInteractable);
         }
 
-        private void ClearCurrentInteractable()
+        private void ResolvePrimaryInteractable(RaycastHit hit)
         {
-            if (currentInteractable == null)
+            if (!hit.collider.TryGetComponent(out IInteractable interactable))
+            {
+                interactable = hit.collider.GetComponentInParent<IInteractable>();
+            }
+
+            if (interactable != null && interactable.CanInteract)
+            {
+                currentInteractable = interactable;
+            }
+        }
+
+        private void ResolveSecondaryInteractable(RaycastHit hit)
+        {
+            if (!hit.collider.TryGetComponent(out ISecondaryInteractable secondaryInteractable))
+            {
+                secondaryInteractable = hit.collider.GetComponentInParent<ISecondaryInteractable>();
+            }
+
+            if (secondaryInteractable != null && secondaryInteractable.CanSecondaryInteract)
+            {
+                currentSecondaryInteractable = secondaryInteractable;
+            }
+        }
+
+        private void ClearCurrentInteractables()
+        {
+            if (currentInteractable == null && currentSecondaryInteractable == null)
             {
                 return;
             }
 
             currentInteractable = null;
+            currentSecondaryInteractable = null;
             UpdateReticleState();
         }
 
-        private void UpdateReticleStateIfChanged(IInteractable previousInteractable)
+        private void UpdateReticleStateIfChanged(
+            IInteractable previousInteractable,
+            ISecondaryInteractable previousSecondaryInteractable)
         {
-            if (ReferenceEquals(previousInteractable, currentInteractable))
+            if (ReferenceEquals(previousInteractable, currentInteractable) &&
+                ReferenceEquals(previousSecondaryInteractable, currentSecondaryInteractable))
             {
                 return;
             }
@@ -156,7 +186,9 @@ namespace Project.Player
                 return;
             }
 
-            uiManager.SetReticleInteractableState(currentInteractable != null);
+            uiManager.SetReticleInteractableState(
+                currentInteractable != null ||
+                currentSecondaryInteractable != null);
         }
 
         private void HandleInteractPressed()
@@ -177,6 +209,26 @@ namespace Project.Player
             }
 
             currentInteractable.Interact();
+        }
+
+        private void HandleSecondaryInteractPressed()
+        {
+            if (!canInteract)
+            {
+                return;
+            }
+
+            if (buildingManager != null && buildingManager.IsBuilding)
+            {
+                return;
+            }
+
+            if (currentSecondaryInteractable == null)
+            {
+                return;
+            }
+
+            currentSecondaryInteractable.SecondaryInteract();
         }
     }
 }

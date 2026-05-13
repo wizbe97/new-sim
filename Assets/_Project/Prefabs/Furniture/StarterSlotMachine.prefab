@@ -25,7 +25,7 @@ Transform:
   m_GameObject: {fileID: 1018281881862021726}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.41, y: -1, z: -0.61}
+  m_LocalPosition: {x: -0.02, y: -1, z: -0.61}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -239,11 +239,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   config: {fileID: 11400000, guid: e002a79c1bec7cf43b81d8c93ccf098c, type: 2}
   playPoint: {fileID: 791381537323213149}
+  storedCashFromDeposits: 0
   currentSessionCredit: 0
-  currentSessionStartingDeposit: 0
-  realisedProfitLoss: 0
   lifetimeDeposited: 0
-  lifetimeWithdrawn: 0
+  lifetimeTicketValuePrinted: 0
 --- !u!114 &7415564730329853605
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -288,6 +287,7 @@ GameObject:
   - component: {fileID: 6724021006099822808}
   - component: {fileID: 156632942275540334}
   - component: {fileID: 2150191535067686485}
+  - component: {fileID: 2778426226770440878}
   m_Layer: 0
   m_Name: BalanceCanvas
   m_TagString: Untagged
@@ -392,9 +392,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   slotMachine: {fileID: 2526472286953741060}
   balanceText: {fileID: 5152255231265446455}
-  totalProfitLossColour: '#00FF66'
+  storedCashColour: '#00FF66'
   currentSessionBalanceColour: '#FFA500'
-  showPlusSignForProfit: 0
+--- !u!114 &2778426226770440878
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7607017820889171105}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5b8916df71401548942b4a83b856449, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetCamera: {fileID: 0}
+  lockToYAxis: 1
+  invertForward: 1
 --- !u!1 &8595637213805036355
 GameObject:
   m_ObjectHideFlags: 0

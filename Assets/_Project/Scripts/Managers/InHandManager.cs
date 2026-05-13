@@ -2,6 +2,7 @@ using Project.Input;
 using Project.Placement;
 using Project.Player;
 using Project.Shop;
+using Project.SlotMachines;
 using UnityEngine;
 
 namespace Project.Hands
@@ -157,6 +158,7 @@ namespace Project.Hands
             {
                 return false;
             }
+            NotifySlotMachinesPickedUpForPlacement(furniture);
 
             SetHandState(InHandItemType.Furniture);
 
@@ -238,12 +240,16 @@ namespace Project.Hands
                 return;
             }
 
+            FurnitureItem furniture = buildingManager.CurrentFurniture;
+
             bool placed = buildingManager.TryPlaceCurrentFurniture();
 
             if (!placed)
             {
                 return;
             }
+
+            NotifySlotMachinesPlacedAfterPlacement(furniture);
 
             ClearHandState();
         }
@@ -255,7 +261,12 @@ namespace Project.Hands
                 return;
             }
 
+            FurnitureItem furniture = buildingManager.CurrentFurniture;
+
             buildingManager.CancelCurrentFurniture();
+
+            NotifySlotMachinesPlacedAfterPlacement(furniture);
+
             ClearHandState();
         }
 
@@ -502,6 +513,36 @@ namespace Project.Hands
         private StoreItemSO GetStoreItemForFurniture(FurnitureItem furniture)
         {
             return furniture != null ? furniture.StoreItem : null;
+        }
+
+        private void NotifySlotMachinesPickedUpForPlacement(FurnitureItem furniture)
+        {
+            if (furniture == null)
+            {
+                return;
+            }
+
+            SlotMachine[] slotMachines = furniture.GetComponentsInChildren<SlotMachine>(true);
+
+            for (int i = 0; i < slotMachines.Length; i++)
+            {
+                slotMachines[i].HandlePickedUpForPlacement();
+            }
+        }
+
+        private void NotifySlotMachinesPlacedAfterPlacement(FurnitureItem furniture)
+        {
+            if (furniture == null)
+            {
+                return;
+            }
+
+            SlotMachine[] slotMachines = furniture.GetComponentsInChildren<SlotMachine>(true);
+
+            for (int i = 0; i < slotMachines.Length; i++)
+            {
+                slotMachines[i].HandlePlacedAfterPlacement();
+            }
         }
     }
 }

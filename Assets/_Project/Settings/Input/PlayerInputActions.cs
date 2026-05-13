@@ -107,6 +107,15 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""SecondaryInteract"",
+                    ""type"": ""Button"",
+                    ""id"": ""aebc456c-5eb3-4be4-98c1-472a2cb6ec10"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -252,6 +261,17 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
                     ""action"": ""Pack"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""9058a81b-baac-42c3-91a8-bd324aa772cc"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SecondaryInteract"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -269,6 +289,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         m_Player_Cancel = m_Player.FindAction("Cancel", throwIfNotFound: true);
         m_Player_PhoneMenu = m_Player.FindAction("PhoneMenu", throwIfNotFound: true);
         m_Player_Pack = m_Player.FindAction("Pack", throwIfNotFound: true);
+        m_Player_SecondaryInteract = m_Player.FindAction("SecondaryInteract", throwIfNotFound: true);
     }
 
     ~@PlayerInputActions()
@@ -344,6 +365,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Cancel;
     private readonly InputAction m_Player_PhoneMenu;
     private readonly InputAction m_Player_Pack;
+    private readonly InputAction m_Player_SecondaryInteract;
     public struct PlayerActions
     {
         private @PlayerInputActions m_Wrapper;
@@ -357,6 +379,7 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         public InputAction @Cancel => m_Wrapper.m_Player_Cancel;
         public InputAction @PhoneMenu => m_Wrapper.m_Player_PhoneMenu;
         public InputAction @Pack => m_Wrapper.m_Player_Pack;
+        public InputAction @SecondaryInteract => m_Wrapper.m_Player_SecondaryInteract;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -393,6 +416,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @Pack.started += instance.OnPack;
             @Pack.performed += instance.OnPack;
             @Pack.canceled += instance.OnPack;
+            @SecondaryInteract.started += instance.OnSecondaryInteract;
+            @SecondaryInteract.performed += instance.OnSecondaryInteract;
+            @SecondaryInteract.canceled += instance.OnSecondaryInteract;
         }
 
         private void UnregisterCallbacks(IPlayerActions instance)
@@ -424,6 +450,9 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
             @Pack.started -= instance.OnPack;
             @Pack.performed -= instance.OnPack;
             @Pack.canceled -= instance.OnPack;
+            @SecondaryInteract.started -= instance.OnSecondaryInteract;
+            @SecondaryInteract.performed -= instance.OnSecondaryInteract;
+            @SecondaryInteract.canceled -= instance.OnSecondaryInteract;
         }
 
         public void RemoveCallbacks(IPlayerActions instance)
@@ -452,5 +481,6 @@ public partial class @PlayerInputActions: IInputActionCollection2, IDisposable
         void OnCancel(InputAction.CallbackContext context);
         void OnPhoneMenu(InputAction.CallbackContext context);
         void OnPack(InputAction.CallbackContext context);
+        void OnSecondaryInteract(InputAction.CallbackContext context);
     }
 }

@@ -1,4 +1,5 @@
 using System.Collections;
+using Project.Managers;
 using Project.NPC.Customer;
 using Project.SlotMachines;
 using Project.World;
@@ -28,6 +29,11 @@ namespace Project.NPC.Spawning
 
         private void Start()
         {
+            if (slotMachineManager == null)
+            {
+                slotMachineManager = FindFirstObjectByType<SlotMachineManager>();
+            }
+
             if (!HasRequiredReferences())
             {
                 enabled = false;

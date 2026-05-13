@@ -21,10 +21,16 @@ namespace Project.Managers
         [SerializeField] private InHandManager inHandManagerPrefab;
         [SerializeField] private ShopPurchaseService shopPurchaseServicePrefab;
         [SerializeField] private ShopUIController shopUIControllerPrefab;
+        [SerializeField] private SlotMachineManager slotMachineManagerPrefab;
+        [SerializeField] private CashDeskManager cashDeskManagerPrefab;
 
         [Header("Scene References")]
         [SerializeField] private PlayerSpawnPoint playerSpawnPoint;
         [SerializeField] private Transform itemDeliveryPad;
+
+        [Header("Cash Desk Scene References")]
+        [SerializeField] private Transform cashDeskQueueStartPoint;
+        [SerializeField] private Transform cashDeskTicketPlacementPoint;
 
         private UIManager uiManager;
         private CursorManager cursorManager;
@@ -37,6 +43,8 @@ namespace Project.Managers
         private InHandManager inHandManager;
         private ShopPurchaseService shopPurchaseService;
         private ShopUIController shopUIController;
+        private SlotMachineManager slotMachineManager;
+        private CashDeskManager cashDeskManager;
 
         public UIManager UIManager => uiManager;
         public CursorManager CursorManager => cursorManager;
@@ -49,6 +57,8 @@ namespace Project.Managers
         public InHandManager InHandManager => inHandManager;
         public ShopPurchaseService ShopPurchaseService => shopPurchaseService;
         public ShopUIController ShopUIController => shopUIController;
+        public SlotMachineManager SlotMachineManager => slotMachineManager;
+        public CashDeskManager CashDeskManager => cashDeskManager;
 
         private void Awake()
         {
@@ -82,6 +92,8 @@ namespace Project.Managers
             inHandManager = SpawnManager(inHandManagerPrefab, nameof(InHandManager));
             shopPurchaseService = SpawnManager(shopPurchaseServicePrefab, nameof(ShopPurchaseService));
             shopUIController = SpawnManager(shopUIControllerPrefab, nameof(ShopUIController));
+            slotMachineManager = SpawnManager(slotMachineManagerPrefab, nameof(SlotMachineManager));
+            cashDeskManager = SpawnManager(cashDeskManagerPrefab, nameof(CashDeskManager));
         }
 
         private void InitializeManagers()
@@ -104,7 +116,17 @@ namespace Project.Managers
                 () => buildingManager.Initialize(playerManager.CurrentPlayer),
                 () => cursorManager.Initialize(uiManager),
                 () => phoneManager.Initialize(playerManager.CurrentPlayer, uiManager, cursorManager),
-                () => inHandManager.Initialize(playerManager.CurrentPlayer, buildingManager)
+                () => inHandManager.Initialize(playerManager.CurrentPlayer, buildingManager),
+
+                () => slotMachineManager.Initialize(
+                    playerManager.CurrentPlayer,
+                    playerBalanceManager,
+                    cursorManager),
+
+                () => cashDeskManager.Initialize(
+                    playerBalanceManager,
+                    cashDeskQueueStartPoint,
+                    cashDeskTicketPlacementPoint)
             };
 
             foreach (Action initializeStep in initializationSteps)
@@ -128,6 +150,8 @@ namespace Project.Managers
             hasRequiredManagers &= ValidateManager(inHandManager, nameof(InHandManager));
             hasRequiredManagers &= ValidateManager(shopPurchaseService, nameof(ShopPurchaseService));
             hasRequiredManagers &= ValidateManager(shopUIController, nameof(ShopUIController));
+            hasRequiredManagers &= ValidateManager(slotMachineManager, nameof(SlotMachineManager));
+            hasRequiredManagers &= ValidateManager(cashDeskManager, nameof(CashDeskManager));
 
             return hasRequiredManagers;
         }
@@ -145,6 +169,18 @@ namespace Project.Managers
             if (itemDeliveryPad == null)
             {
                 Debug.LogError($"{nameof(GameManager)} is missing Item Delivery Pad scene reference.", this);
+                hasRequiredSceneReferences = false;
+            }
+
+            if (cashDeskQueueStartPoint == null)
+            {
+                Debug.LogError($"{nameof(GameManager)} is missing Cash Desk Queue Start Point scene reference.", this);
+                hasRequiredSceneReferences = false;
+            }
+
+            if (cashDeskTicketPlacementPoint == null)
+            {
+                Debug.LogError($"{nameof(GameManager)} is missing Cash Desk Ticket Placement Point scene reference.", this);
                 hasRequiredSceneReferences = false;
             }
 

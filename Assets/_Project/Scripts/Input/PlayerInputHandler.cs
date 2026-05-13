@@ -17,6 +17,7 @@ namespace Project.Input
         public event Action SprintEnded;
 
         public event Action InteractPressed;
+        public event Action SecondaryInteractPressed;
         public event Action RotatePressed;
         public event Action PackPressed;
         public event Action CancelPressed;
@@ -44,6 +45,7 @@ namespace Project.Input
             inputActions.Player.Sprint.canceled += OnSprintCanceled;
 
             inputActions.Player.Interact.performed += OnInteractPerformed;
+            inputActions.Player.SecondaryInteract.performed += OnSecondaryInteractPerformed;
             inputActions.Player.Rotate.performed += OnRotatePerformed;
             inputActions.Player.Pack.performed += OnPackPerformed;
             inputActions.Player.Cancel.performed += OnCancelPerformed;
@@ -65,6 +67,7 @@ namespace Project.Input
             inputActions.Player.Sprint.canceled -= OnSprintCanceled;
 
             inputActions.Player.Interact.performed -= OnInteractPerformed;
+            inputActions.Player.SecondaryInteract.performed -= OnSecondaryInteractPerformed;
             inputActions.Player.Rotate.performed -= OnRotatePerformed;
             inputActions.Player.Pack.performed -= OnPackPerformed;
             inputActions.Player.Cancel.performed -= OnCancelPerformed;
@@ -121,6 +124,11 @@ namespace Project.Input
         private void OnInteractPerformed(UnityEngine.InputSystem.InputAction.CallbackContext context)
         {
             InteractPressed?.Invoke();
+        }
+
+        private void OnSecondaryInteractPerformed(UnityEngine.InputSystem.InputAction.CallbackContext context)
+        {
+            SecondaryInteractPressed?.Invoke();
         }
 
         private void OnRotatePerformed(UnityEngine.InputSystem.InputAction.CallbackContext context)

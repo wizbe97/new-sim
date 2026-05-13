@@ -11,7 +11,7 @@ namespace Project.NPC.Customer
         [SerializeField] private int startingBalance;
         [SerializeField] private int walletBalance;
         [SerializeField] private int totalDeposited;
-        [SerializeField] private int totalWithdrawn;
+        [SerializeField] private int totalCashOutPaymentsReceived;
         [SerializeField] private int spinsPlayed;
         [SerializeField] private int wins;
         [SerializeField] private int losses;
@@ -21,7 +21,7 @@ namespace Project.NPC.Customer
         public int StartingBalance => startingBalance;
         public int WalletBalance => walletBalance;
         public int TotalDeposited => totalDeposited;
-        public int TotalWithdrawn => totalWithdrawn;
+        public int TotalCashOutPaymentsReceived => totalCashOutPaymentsReceived;
         public int SpinsPlayed => spinsPlayed;
         public int Wins => wins;
         public int Losses => losses;
@@ -34,9 +34,11 @@ namespace Project.NPC.Customer
             mood = CustomerMood.Happy;
         }
 
-        public int GetTotalMoney(int activeSlotCredit)
+        public int GetTotalMoney(int activeSlotCredit, int activeTicketValue)
         {
-            return Mathf.Max(0, walletBalance) + Mathf.Max(0, activeSlotCredit);
+            return Mathf.Max(0, walletBalance)
+                   + Mathf.Max(0, activeSlotCredit)
+                   + Mathf.Max(0, activeTicketValue);
         }
 
         public void SpendFromWallet(int amount)
@@ -47,12 +49,12 @@ namespace Project.NPC.Customer
             totalDeposited += safeAmount;
         }
 
-        public void AddToWallet(int amount)
+        public void AddCashOutPaymentToWallet(int amount)
         {
             int safeAmount = Mathf.Max(0, amount);
 
             walletBalance += safeAmount;
-            totalWithdrawn += safeAmount;
+            totalCashOutPaymentsReceived += safeAmount;
         }
 
         public void RecordSpin(int betAmount, int payoutAmount)

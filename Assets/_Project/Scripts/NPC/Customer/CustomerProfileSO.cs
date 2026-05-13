@@ -33,6 +33,9 @@ namespace Project.NPC.Customer
         [Tooltip("Chance that a customer deposits again when their current slot credit reaches £0.")]
         [SerializeField, Range(0f, 1f)] private float redepositChanceWhenSlotCreditHitsZero = 0.5f;
 
+        [Tooltip("Customers will not voluntarily print/cash out a ticket below this value. This prevents tiny £1/£2 tickets.")]
+        [SerializeField, Min(0)] private int minimumTicketCashOutAmount = 10;
+
         [Header("Mood Balance Thresholds")]
         [Tooltip("Customer becomes Satisfied when their total money is at least this multiplier of their starting balance.")]
         [SerializeField, Min(1f)] private float satisfiedBalanceMultiplier = 1.5f;
@@ -50,7 +53,7 @@ namespace Project.NPC.Customer
         [Tooltip("After becoming Satisfied, customers must play this many extra spins before they are allowed to cash out because they are satisfied.")]
         [SerializeField, Min(0)] private int minimumSpinsAfterBecomingSatisfiedBeforeLeaving = 5;
 
-        [Tooltip("Hard cap for one deposit session.")]
+        [Tooltip("Hard cap for one deposit session. If the customer has less than Minimum Ticket Cash Out Amount, they keep spinning until they either bust or rise above the minimum cash-out amount.")]
         [SerializeField, Min(1)] private int maximumSessionSpins = 80;
 
         [Header("Leave Chances")]
@@ -85,6 +88,7 @@ namespace Project.NPC.Customer
         public float MinDepositPercent => minDepositPercent;
         public float MaxDepositPercent => maxDepositPercent;
         public float RedepositChanceWhenSlotCreditHitsZero => redepositChanceWhenSlotCreditHitsZero;
+        public int MinimumTicketCashOutAmount => minimumTicketCashOutAmount;
 
         public float SatisfiedBalanceMultiplier => satisfiedBalanceMultiplier;
         public float FrustratedBalanceMultiplier => frustratedBalanceMultiplier;
@@ -207,6 +211,7 @@ namespace Project.NPC.Customer
             frustratedBalanceMultiplier = Mathf.Clamp01(frustratedBalanceMultiplier);
             angryBalanceMultiplier = Mathf.Clamp(angryBalanceMultiplier, 0f, frustratedBalanceMultiplier);
             satisfiedBalanceMultiplier = Mathf.Max(1f, satisfiedBalanceMultiplier);
+            minimumTicketCashOutAmount = Mathf.Max(0, minimumTicketCashOutAmount);
         }
 #endif
     }
