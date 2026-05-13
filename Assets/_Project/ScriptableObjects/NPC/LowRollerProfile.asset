@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da994e5277be04d40b29423e90a38197, type: 3}
+  m_Name: LowRollerProfile
+  m_EditorClassIdentifier: 
+  profileName: Low Roller Customer
+  stake: 0
+  lowRollerMinBalance: 50
+  lowRollerMaxBalance: 200
+  mediumRollerMinBalance: 200
+  mediumRollerMaxBalance: 1000
+  highRollerMinBalance: 1000
+  highRollerMaxBalance: 5000
+  minDepositPercent: 0.25
+  maxDepositPercent: 1
+  redepositChanceWhenSlotCreditHitsZero: 0.5
+  satisfiedBalanceMultiplier: 1.5
+  frustratedBalanceMultiplier: 0.5
+  angryBalanceMultiplier: 0.2
+  minimumSessionSpinsBeforeLeaving: 25
+  minimumSpinsAfterBecomingSatisfiedBeforeLeaving: 5
+  maximumSessionSpins: 100
+  satisfiedLeaveChance: 0.571
+  frustratedLeaveChance: 0.5
+  angryLeaveChance: 0.8
+  standStillWhileWaitingChance: 0.35
+  minIdleWaitSeconds: 2
+  maxIdleWaitSeconds: 6
+  maxNoMachineWaitingActionsBeforeLeaving: 5
+  wanderAfterMachineChance: 0.35
