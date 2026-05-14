@@ -7,12 +7,14 @@ namespace Project.Shop
     {
         private UIManager uiManager;
         private ShopPurchaseService shopPurchaseService;
+        private CasinoProgressionManager casinoProgressionManager;
 
         private bool isInitialized;
 
         public void Initialize(
             UIManager newUIManager,
-            ShopPurchaseService newShopPurchaseService)
+            ShopPurchaseService newShopPurchaseService,
+            CasinoProgressionManager newCasinoProgressionManager)
         {
             if (newUIManager == null)
             {
@@ -26,6 +28,12 @@ namespace Project.Shop
                 return;
             }
 
+            if (newCasinoProgressionManager == null)
+            {
+                Debug.LogError($"{nameof(ShopUIController)} cannot initialize because CasinoProgressionManager is missing.", this);
+                return;
+            }
+
             if (isInitialized)
             {
                 UnsubscribeFromEvents();
@@ -33,8 +41,10 @@ namespace Project.Shop
 
             uiManager = newUIManager;
             shopPurchaseService = newShopPurchaseService;
+            casinoProgressionManager = newCasinoProgressionManager;
 
             uiManager.SetShopOwnershipProvider(shopPurchaseService.IsUniqueItemOwned);
+            uiManager.SetShopUnlockProvider(shopPurchaseService.IsItemUnlocked);
 
             SubscribeToEvents();
 
@@ -57,6 +67,11 @@ namespace Project.Shop
             {
                 shopPurchaseService.ItemPurchased += HandleItemPurchased;
             }
+
+            if (casinoProgressionManager != null)
+            {
+                casinoProgressionManager.LevelChanged += HandleCasinoLevelChanged;
+            }
         }
 
         private void UnsubscribeFromEvents()
@@ -69,6 +84,11 @@ namespace Project.Shop
             if (shopPurchaseService != null)
             {
                 shopPurchaseService.ItemPurchased -= HandleItemPurchased;
+            }
+
+            if (casinoProgressionManager != null)
+            {
+                casinoProgressionManager.LevelChanged -= HandleCasinoLevelChanged;
             }
         }
 
@@ -84,6 +104,16 @@ namespace Project.Shop
         }
 
         private void HandleItemPurchased(StoreItemSO storeItem)
+        {
+            RefreshShop();
+        }
+
+        private void HandleCasinoLevelChanged(int newLevel)
+        {
+            RefreshShop();
+        }
+
+        private void RefreshShop()
         {
             if (uiManager == null)
             {

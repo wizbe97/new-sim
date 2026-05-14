@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using Project.CashDesk;
 using Project.NPC.Customer;
+using Project.Progression;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -46,6 +47,8 @@ namespace Project.Managers
         [Header("Economy")]
         [SerializeField] private PlayerBalanceManager playerBalanceManager;
 
+        private CasinoProgressionManager casinoProgressionManager;
+
         private readonly List<QueueEntry> queue = new();
         private Coroutine delayedQueueUpdateRoutine;
 
@@ -54,11 +57,13 @@ namespace Project.Managers
         public void Initialize(
             PlayerBalanceManager balanceManager,
             Transform newQueueStartPoint,
-            Transform newTicketPlacementPoint)
+            Transform newTicketPlacementPoint,
+            CasinoProgressionManager newCasinoProgressionManager)
         {
             playerBalanceManager = balanceManager;
             queueStartPoint = newQueueStartPoint;
             ticketPlacementPoint = newTicketPlacementPoint;
+            casinoProgressionManager = newCasinoProgressionManager;
 
             if (queueFacingTarget == null)
             {
@@ -80,6 +85,12 @@ namespace Project.Managers
             if (ticketPlacementPoint == null)
             {
                 Debug.LogError($"{nameof(CashDeskManager)} cannot initialize because Ticket Placement Point is missing.", this);
+                return;
+            }
+
+            if (casinoProgressionManager == null)
+            {
+                Debug.LogError($"{nameof(CashDeskManager)} cannot initialize because CasinoProgressionManager is missing.", this);
                 return;
             }
 
@@ -146,16 +157,19 @@ namespace Project.Managers
                 return false;
             }
 
-            if (!playerBalanceManager.CanAfford(ticket.Amount))
+            if (!playerBalanceManager.CanAffordCashOut(ticket.Amount))
             {
                 Debug.LogWarning(
-                    $"Cannot pay £{ticket.Amount} ticket. Player/casino balance is only £{playerBalanceManager.CurrentBalance}.",
+                    $"Cannot pay £{ticket.Amount} ticket. " +
+                    $"Casino Funds: £{playerBalanceManager.CurrentCasinoFunds}, Reserve Fund: £{playerBalanceManager.CurrentReserveFund}.",
                     this);
 
                 return false;
             }
 
-            bool paid = playerBalanceManager.TrySpend(ticket.Amount);
+            int paidAmount = ticket.Amount;
+
+            bool paid = playerBalanceManager.TryPayCashOut(paidAmount);
 
             if (!paid)
             {
@@ -164,19 +178,31 @@ namespace Project.Managers
 
             ticket.MarkPaid();
 
-            // Remove from the queue before telling the customer to leave.
-            // This guarantees the paid customer is no longer affected by delayed queue movement.
             queue.RemoveAt(0);
 
-            paidEntry.Customer.ReceiveCashOutPayment(ticket.Amount);
+            paidEntry.Customer.ReceiveCashOutPayment(paidAmount);
 
-            Debug.Log($"{paidEntry.Customer.name} was paid £{ticket.Amount} at the cash desk.", this);
+            AwardCustomerCashedOutXp(paidAmount);
+
+            Debug.Log($"{paidEntry.Customer.name} was paid £{paidAmount} at the cash desk.", this);
 
             Destroy(ticket.gameObject);
 
             DelayRemainingQueueAdvance();
 
             return true;
+        }
+
+        private void AwardCustomerCashedOutXp(int paidAmount)
+        {
+            if (casinoProgressionManager == null || paidAmount <= 0)
+            {
+                return;
+            }
+
+            casinoProgressionManager.AddConfiguredXp(
+                CasinoXpSource.CustomerCashedOut,
+                paidAmount);
         }
 
         private bool IsCustomerAlreadyQueued(CustomerController customer)

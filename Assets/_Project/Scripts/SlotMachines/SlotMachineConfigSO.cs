@@ -28,6 +28,10 @@ namespace Project.SlotMachines
         [Tooltip("Higher values can later be used to make customers lose patience faster on tighter machines.")]
         [SerializeField, Range(0f, 1f)] private float frustrationPressure = 0.25f;
 
+        [Header("Progression")]
+        [Tooltip("Multiplier applied to casino XP earned from this machine. Base XP still comes from CasinoLevelConfigSO.")]
+        [SerializeField, Min(0f)] private float casinoXpMultiplier = 1f;
+
         [Header("Payout Bands")]
         [SerializeField] private List<SlotMachinePayoutBand> payoutBands = new();
 
@@ -37,6 +41,7 @@ namespace Project.SlotMachines
         public float TargetRtp => targetRtp;
         public float AttractionScore => attractionScore;
         public float FrustrationPressure => frustrationPressure;
+        public float CasinoXpMultiplier => casinoXpMultiplier;
         public IReadOnlyList<SlotMachinePayoutBand> PayoutBands => payoutBands;
 
         public float EstimatedRtp => CalculateEstimatedRtp();
@@ -128,5 +133,14 @@ namespace Project.SlotMachines
 
             return weightedMultiplierTotal / totalWeight;
         }
+
+#if UNITY_EDITOR
+        private void OnValidate()
+        {
+            maximumBet = Mathf.Max(1, maximumBet);
+            maximumWinMultiplier = Mathf.Max(1, maximumWinMultiplier);
+            casinoXpMultiplier = Mathf.Max(0f, casinoXpMultiplier);
+        }
+#endif
     }
 }

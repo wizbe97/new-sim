@@ -27,6 +27,9 @@ namespace Project.Shop
         [SerializeField, Min(0)] private int price = 100;
         [SerializeField] private bool isUniqueItem;
 
+        [Header("Progression")]
+        [SerializeField, Min(1)] private int requiredCasinoLevel = 1;
+
         public string ItemId => itemId;
         public string ItemName => itemName;
         public string ItemDescription => itemDescription;
@@ -36,6 +39,7 @@ namespace Project.Shop
         public DeliveryBox DeliveryBoxPrefab => deliveryBoxPrefab;
         public int Price => price;
         public bool IsUniqueItem => isUniqueItem;
+        public int RequiredCasinoLevel => requiredCasinoLevel;
 
         public string DisplayName => itemName;
 
@@ -53,6 +57,8 @@ namespace Project.Shop
             {
                 itemName = name;
             }
+
+            requiredCasinoLevel = Mathf.Max(1, requiredCasinoLevel);
         }
 #endif
     }

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Project.Input;
 using Project.Player;
+using Project.Progression;
 using Project.SlotMachines;
 using Project.SlotMachines.UI;
 using UnityEngine;
@@ -16,6 +17,7 @@ namespace Project.Managers
 
         private PlayerBalanceManager playerBalanceManager;
         private CursorManager cursorManager;
+        private CasinoProgressionManager casinoProgressionManager;
         private FirstPersonController player;
         private PlayerInteractionController playerInteractionController;
         private PlayerInputHandler inputHandler;
@@ -30,11 +32,13 @@ namespace Project.Managers
         public void Initialize(
             FirstPersonController newPlayer,
             PlayerBalanceManager balanceManager,
-            CursorManager newCursorManager)
+            CursorManager newCursorManager,
+            CasinoProgressionManager newCasinoProgressionManager)
         {
             player = newPlayer;
             playerBalanceManager = balanceManager;
             cursorManager = newCursorManager;
+            casinoProgressionManager = newCasinoProgressionManager;
 
             if (player == null)
             {
@@ -51,6 +55,12 @@ namespace Project.Managers
             if (cursorManager == null)
             {
                 Debug.LogError($"{nameof(SlotMachineManager)} cannot initialize because CursorManager is missing.", this);
+                return;
+            }
+
+            if (casinoProgressionManager == null)
+            {
+                Debug.LogError($"{nameof(SlotMachineManager)} cannot initialize because CasinoProgressionManager is missing.", this);
                 return;
             }
 
@@ -205,6 +215,17 @@ namespace Project.Managers
             }
         }
 
+        public void AwardSlotMachineXp(CasinoXpSource source, SlotMachine slotMachine)
+        {
+            if (casinoProgressionManager == null || slotMachine == null)
+            {
+                return;
+            }
+
+            float multiplier = GetSlotMachineXpMultiplier(slotMachine);
+            casinoProgressionManager.AddConfiguredXp(source, multiplier);
+        }
+
         private void RegisterExistingMachines()
         {
             registeredMachines.RemoveAll(machine => machine == null);
@@ -253,11 +274,38 @@ namespace Project.Managers
 
             playerBalanceManager.AddBalance(collectedAmount);
 
+            AwardSlotCashCollectedXp(activeCollectionSlotMachine, collectedAmount);
+
             Debug.Log(
                 $"Collected £{collectedAmount} from {activeCollectionSlotMachine.name} into player balance.",
                 activeCollectionSlotMachine);
 
             HideCollectionPanel();
+        }
+
+        private void AwardSlotCashCollectedXp(SlotMachine slotMachine, int collectedAmount)
+        {
+            if (casinoProgressionManager == null || slotMachine == null || collectedAmount <= 0)
+            {
+                return;
+            }
+
+            float multiplier = GetSlotMachineXpMultiplier(slotMachine);
+
+            casinoProgressionManager.AddConfiguredXp(
+                CasinoXpSource.SlotCashCollected,
+                collectedAmount,
+                multiplier);
+        }
+
+        private float GetSlotMachineXpMultiplier(SlotMachine slotMachine)
+        {
+            if (slotMachine == null || slotMachine.Config == null)
+            {
+                return 1f;
+            }
+
+            return Mathf.Max(0f, slotMachine.Config.CasinoXpMultiplier);
         }
 
         private void HandleCloseRequested()

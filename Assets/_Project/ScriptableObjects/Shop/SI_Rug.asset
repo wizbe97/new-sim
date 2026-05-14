@@ -17,5 +17,8 @@ MonoBehaviour:
   itemDescription: A Small Rug
   itemType: 1
   itemIcon: {fileID: 10911, guid: 0000000000000000f000000000000000, type: 0}
+  placeablePrefab: {fileID: 0}
+  deliveryBoxPrefab: {fileID: 0}
   price: 50
   isUniqueItem: 0
+  requiredCasinoLevel: 2

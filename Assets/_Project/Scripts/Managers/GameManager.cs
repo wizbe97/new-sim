@@ -23,6 +23,7 @@ namespace Project.Managers
         [SerializeField] private ShopUIController shopUIControllerPrefab;
         [SerializeField] private SlotMachineManager slotMachineManagerPrefab;
         [SerializeField] private CashDeskManager cashDeskManagerPrefab;
+        [SerializeField] private CasinoProgressionManager casinoProgressionManagerPrefab;
 
         [Header("Scene References")]
         [SerializeField] private PlayerSpawnPoint playerSpawnPoint;
@@ -45,6 +46,7 @@ namespace Project.Managers
         private ShopUIController shopUIController;
         private SlotMachineManager slotMachineManager;
         private CashDeskManager cashDeskManager;
+        private CasinoProgressionManager casinoProgressionManager;
 
         public UIManager UIManager => uiManager;
         public CursorManager CursorManager => cursorManager;
@@ -59,6 +61,7 @@ namespace Project.Managers
         public ShopUIController ShopUIController => shopUIController;
         public SlotMachineManager SlotMachineManager => slotMachineManager;
         public CashDeskManager CashDeskManager => cashDeskManager;
+        public CasinoProgressionManager CasinoProgressionManager => casinoProgressionManager;
 
         private void Awake()
         {
@@ -94,17 +97,19 @@ namespace Project.Managers
             shopUIController = SpawnManager(shopUIControllerPrefab, nameof(ShopUIController));
             slotMachineManager = SpawnManager(slotMachineManagerPrefab, nameof(SlotMachineManager));
             cashDeskManager = SpawnManager(cashDeskManagerPrefab, nameof(CashDeskManager));
+            casinoProgressionManager = SpawnManager(casinoProgressionManagerPrefab, nameof(CasinoProgressionManager));
         }
 
         private void InitializeManagers()
         {
             Action[] initializationSteps =
             {
-                () => playerBalanceManager.Initialize(),
+                () => casinoProgressionManager.Initialize(),
+                () => playerBalanceManager.Initialize(casinoProgressionManager),
                 () => itemDeliveryManager.Initialize(itemDeliveryPad),
-                () => shopPurchaseService.Initialize(playerBalanceManager, itemDeliveryManager),
-                () => uiManager.Initialize(playerBalanceManager),
-                () => shopUIController.Initialize(uiManager, shopPurchaseService),
+                () => shopPurchaseService.Initialize(playerBalanceManager, itemDeliveryManager, casinoProgressionManager),
+                () => uiManager.Initialize(playerBalanceManager, casinoProgressionManager),
+                () => shopUIController.Initialize(uiManager, shopPurchaseService, casinoProgressionManager),
 
                 () =>
                 {
@@ -116,17 +121,19 @@ namespace Project.Managers
                 () => buildingManager.Initialize(playerManager.CurrentPlayer),
                 () => cursorManager.Initialize(uiManager),
                 () => phoneManager.Initialize(playerManager.CurrentPlayer, uiManager, cursorManager),
-                () => inHandManager.Initialize(playerManager.CurrentPlayer, buildingManager),
+                () => inHandManager.Initialize(playerManager.CurrentPlayer, buildingManager, casinoProgressionManager),
 
                 () => slotMachineManager.Initialize(
                     playerManager.CurrentPlayer,
                     playerBalanceManager,
-                    cursorManager),
+                    cursorManager,
+                    casinoProgressionManager),
 
                 () => cashDeskManager.Initialize(
                     playerBalanceManager,
                     cashDeskQueueStartPoint,
-                    cashDeskTicketPlacementPoint)
+                    cashDeskTicketPlacementPoint,
+                    casinoProgressionManager)
             };
 
             foreach (Action initializeStep in initializationSteps)
@@ -152,6 +159,7 @@ namespace Project.Managers
             hasRequiredManagers &= ValidateManager(shopUIController, nameof(ShopUIController));
             hasRequiredManagers &= ValidateManager(slotMachineManager, nameof(SlotMachineManager));
             hasRequiredManagers &= ValidateManager(cashDeskManager, nameof(CashDeskManager));
+            hasRequiredManagers &= ValidateManager(casinoProgressionManager, nameof(CasinoProgressionManager));
 
             return hasRequiredManagers;
         }

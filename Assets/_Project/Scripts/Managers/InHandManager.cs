@@ -1,6 +1,8 @@
 using Project.Input;
+using Project.Managers;
 using Project.Placement;
 using Project.Player;
+using Project.Progression;
 using Project.Shop;
 using Project.SlotMachines;
 using UnityEngine;
@@ -24,6 +26,7 @@ namespace Project.Hands
         private FirstPersonController player;
         private PlayerInputHandler input;
         private BuildingManager buildingManager;
+        private CasinoProgressionManager casinoProgressionManager;
 
         private Transform heldBoxPoint;
         private DeliveryBox heldBox;
@@ -39,7 +42,10 @@ namespace Project.Hands
         public bool IsHoldingFurniture => currentItemType == InHandItemType.Furniture && buildingManager != null && buildingManager.IsBuilding;
         public DeliveryBox HeldBox => heldBox;
 
-        public void Initialize(FirstPersonController newPlayer, BuildingManager newBuildingManager)
+        public void Initialize(
+            FirstPersonController newPlayer,
+            BuildingManager newBuildingManager,
+            CasinoProgressionManager newCasinoProgressionManager)
         {
             if (newPlayer == null)
             {
@@ -53,8 +59,15 @@ namespace Project.Hands
                 return;
             }
 
+            if (newCasinoProgressionManager == null)
+            {
+                Debug.LogError($"{nameof(InHandManager)} cannot initialize because CasinoProgressionManager is missing.", this);
+                return;
+            }
+
             player = newPlayer;
             buildingManager = newBuildingManager;
+            casinoProgressionManager = newCasinoProgressionManager;
 
             input = player.GetComponent<PlayerInputHandler>();
 
@@ -158,6 +171,7 @@ namespace Project.Hands
             {
                 return false;
             }
+
             NotifySlotMachinesPickedUpForPlacement(furniture);
 
             SetHandState(InHandItemType.Furniture);
@@ -250,6 +264,7 @@ namespace Project.Hands
             }
 
             NotifySlotMachinesPlacedAfterPlacement(furniture);
+            AwardPlacementXpIfNeeded(furniture);
 
             ClearHandState();
         }
@@ -513,6 +528,21 @@ namespace Project.Hands
         private StoreItemSO GetStoreItemForFurniture(FurnitureItem furniture)
         {
             return furniture != null ? furniture.StoreItem : null;
+        }
+
+        private void AwardPlacementXpIfNeeded(FurnitureItem furniture)
+        {
+            if (furniture == null || casinoProgressionManager == null)
+            {
+                return;
+            }
+
+            if (!furniture.TryMarkPlacementXpAwarded())
+            {
+                return;
+            }
+
+            casinoProgressionManager.AddConfiguredXp(CasinoXpSource.ItemPlaced);
         }
 
         private void NotifySlotMachinesPickedUpForPlacement(FurnitureItem furniture)

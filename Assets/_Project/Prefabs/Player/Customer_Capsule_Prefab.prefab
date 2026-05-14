@@ -639,9 +639,9 @@ MonoBehaviour:
   searchRetryDelay: 1
   ticketHandLocalPosition: {x: 0.35, y: 0.6, z: 0.25}
   ticketHandLocalEulerAngles: {x: 0, y: 0, z: 0}
-  logEverySpin: 1
-  logSessionSummary: 1
-  logIdleBehaviour: 1
+  logEverySpin: 0
+  logSessionSummary: 0
+  logIdleBehaviour: 0
   currentState: 0
   stats:
     stake: 0

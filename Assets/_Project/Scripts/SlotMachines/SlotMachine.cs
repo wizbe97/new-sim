@@ -2,6 +2,7 @@ using System;
 using Project.Interfaces;
 using Project.Managers;
 using Project.NPC.Customer;
+using Project.Progression;
 using UnityEngine;
 
 namespace Project.SlotMachines
@@ -146,6 +147,8 @@ namespace Project.SlotMachines
 
             SetCurrentSessionCredit(creditAfterSpin);
 
+            AwardSlotMachineXp(CasinoXpSource.SlotSpin);
+
             return new SlotSpinResult(betAmount, payoutAmount, currentSessionCredit);
         }
 
@@ -169,6 +172,8 @@ namespace Project.SlotMachines
             activeCustomer = null;
             reservedBy = null;
 
+            AwardSlotMachineXp(CasinoXpSource.SlotSessionCompleted);
+
             return ticketAmount;
         }
 
@@ -189,6 +194,8 @@ namespace Project.SlotMachines
 
             activeCustomer = null;
             reservedBy = null;
+
+            AwardSlotMachineXp(CasinoXpSource.SlotSessionCompleted);
 
             return remainingCredit;
         }
@@ -277,6 +284,18 @@ namespace Project.SlotMachines
             NotifyFinancialsChanged();
 
             Debug.Log($"{name} was placed and is now discoverable again.", this);
+        }
+
+        private void AwardSlotMachineXp(CasinoXpSource source)
+        {
+            TryRegisterWithManager();
+
+            if (manager == null)
+            {
+                return;
+            }
+
+            manager.AwardSlotMachineXp(source, this);
         }
 
         private void SetCurrentSessionCredit(int newCredit)

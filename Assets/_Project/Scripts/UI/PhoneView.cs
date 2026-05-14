@@ -35,6 +35,7 @@ namespace Project.UI
         private readonly List<ShopItemButtonView> spawnedShopItems = new();
 
         private Func<StoreItemSO, bool> ownershipProvider;
+        private Func<StoreItemSO, bool> unlockProvider;
 
         private void Awake()
         {
@@ -82,6 +83,12 @@ namespace Project.UI
             RefreshShopItems();
         }
 
+        public void SetUnlockProvider(Func<StoreItemSO, bool> provider)
+        {
+            unlockProvider = provider;
+            RefreshShopItems();
+        }
+
         public void Show()
         {
             if (phoneRoot == null)
@@ -124,7 +131,12 @@ namespace Project.UI
                     continue;
                 }
 
-                itemView.SetOwned(IsOwned(itemView.StoreItem));
+                StoreItemSO storeItem = itemView.StoreItem;
+
+                itemView.SetPurchaseState(
+                    IsOwned(storeItem),
+                    IsUnlocked(storeItem),
+                    storeItem.RequiredCasinoLevel);
             }
         }
 
@@ -182,7 +194,7 @@ namespace Project.UI
 
                 ShopItemButtonView itemView = Instantiate(shopItemButtonPrefab, shopItemsContentRoot);
                 itemView.name = $"ShopItemButton_{item.ItemName}";
-                itemView.Initialize(item, IsOwned(item));
+                itemView.Initialize(item, IsOwned(item), IsUnlocked(item), item.RequiredCasinoLevel);
                 itemView.BuyPressed += HandleShopItemBuyPressed;
 
                 spawnedShopItems.Add(itemView);
@@ -210,6 +222,11 @@ namespace Project.UI
         private bool IsOwned(StoreItemSO storeItem)
         {
             return ownershipProvider != null && ownershipProvider.Invoke(storeItem);
+        }
+
+        private bool IsUnlocked(StoreItemSO storeItem)
+        {
+            return unlockProvider == null || unlockProvider.Invoke(storeItem);
         }
 
         private void HandleShopAppClicked()

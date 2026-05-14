@@ -17,6 +17,9 @@ namespace Project.Placement
         [Tooltip("The BoxCollider used for placement obstruction checks. If empty, the first child BoxCollider is used.")]
         [SerializeField] private BoxCollider placementBounds;
 
+        [Header("Progression")]
+        [SerializeField] private bool hasAwardedPlacementXp;
+
         [Header("Preview Visuals")]
         [SerializeField] private bool useExplicitPreviewRenderers;
         [SerializeField] private Renderer[] explicitPreviewRenderers;
@@ -30,6 +33,7 @@ namespace Project.Placement
         public StoreItemSO StoreItem => storeItem;
         public float MaxPlacementDistance => maxPlacementDistance;
         public float SurfaceOffset => surfaceOffset;
+        public bool HasAwardedPlacementXp => hasAwardedPlacementXp;
 
         public BoxCollider PlacementBounds
         {
@@ -47,6 +51,17 @@ namespace Project.Placement
         public void SetStoreItem(StoreItemSO item)
         {
             storeItem = item;
+        }
+
+        public bool TryMarkPlacementXpAwarded()
+        {
+            if (hasAwardedPlacementXp)
+            {
+                return false;
+            }
+
+            hasAwardedPlacementXp = true;
+            return true;
         }
 
         public void BeginPreview()

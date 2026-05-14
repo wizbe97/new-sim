@@ -7,10 +7,13 @@ namespace Project.UI
     {
         [Header("References")]
         [SerializeField] private Image reticleImage;
+        [SerializeField] private CasinoProgressionDisplayView casinoProgressionDisplay;
 
         [Header("Reticle Colors")]
         [SerializeField] private Color normalReticleColor = Color.white;
         [SerializeField] private Color interactableReticleColor = Color.green;
+
+        public CasinoProgressionDisplayView CasinoProgressionDisplay => casinoProgressionDisplay;
 
         public void ShowReticle()
         {
@@ -44,6 +47,16 @@ namespace Project.UI
             reticleImage.color = hasInteractable
                 ? interactableReticleColor
                 : normalReticleColor;
+        }
+
+        public void SetCasinoProgressionDisplay(int level, int currentLevelXp, int xpRequiredForNextLevel)
+        {
+            if (casinoProgressionDisplay == null)
+            {
+                return;
+            }
+
+            casinoProgressionDisplay.SetProgression(level, currentLevelXp, xpRequiredForNextLevel);
         }
     }
 }

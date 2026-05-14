@@ -15,13 +15,20 @@ namespace Project.UI
         [SerializeField] private Button buyButton;
         [SerializeField] private TextMeshProUGUI buyButtonText;
 
+        [Header("Optional Lock Display")]
+        [Tooltip("Optional. If assigned, displays lock text such as 'Requires Level 3'.")]
+        [SerializeField] private TextMeshProUGUI lockStatusText;
+
         [Header("Formatting")]
         [SerializeField] private string currencyPrefix = "$";
         [SerializeField] private string buyText = "Buy";
         [SerializeField] private string ownedText = "Owned";
+        [SerializeField] private string lockedTextFormat = "Requires Level {0}";
 
         private StoreItemSO storeItem;
         private bool isOwned;
+        private bool isUnlocked = true;
+        private int requiredCasinoLevel = 1;
 
         public event Action<StoreItemSO> BuyPressed;
 
@@ -45,8 +52,23 @@ namespace Project.UI
 
         public void Initialize(StoreItemSO item, bool owned)
         {
+            Initialize(
+                item,
+                owned,
+                unlocked: true,
+                newRequiredCasinoLevel: item != null ? item.RequiredCasinoLevel : 1);
+        }
+
+        public void Initialize(
+            StoreItemSO item,
+            bool owned,
+            bool unlocked,
+            int newRequiredCasinoLevel)
+        {
             storeItem = item;
             isOwned = owned;
+            isUnlocked = unlocked;
+            requiredCasinoLevel = Mathf.Max(1, newRequiredCasinoLevel);
 
             Refresh();
         }
@@ -54,6 +76,15 @@ namespace Project.UI
         public void SetOwned(bool owned)
         {
             isOwned = owned;
+            RefreshPurchaseState();
+        }
+
+        public void SetPurchaseState(bool owned, bool unlocked, int newRequiredCasinoLevel)
+        {
+            isOwned = owned;
+            isUnlocked = unlocked;
+            requiredCasinoLevel = Mathf.Max(1, newRequiredCasinoLevel);
+
             RefreshPurchaseState();
         }
 
@@ -88,15 +119,36 @@ namespace Project.UI
         private void RefreshPurchaseState()
         {
             bool shouldDisableBecauseOwned = storeItem != null && storeItem.IsUniqueItem && isOwned;
+            bool shouldDisableBecauseLocked = !isUnlocked;
+            bool canBuy = !shouldDisableBecauseOwned && !shouldDisableBecauseLocked;
 
             if (buyButton != null)
             {
-                buyButton.interactable = !shouldDisableBecauseOwned;
+                buyButton.interactable = canBuy;
             }
 
             if (buyButtonText != null)
             {
-                buyButtonText.text = shouldDisableBecauseOwned ? ownedText : buyText;
+                if (shouldDisableBecauseOwned)
+                {
+                    buyButtonText.text = ownedText;
+                }
+                else if (shouldDisableBecauseLocked)
+                {
+                    buyButtonText.text = string.Format(lockedTextFormat, requiredCasinoLevel);
+                }
+                else
+                {
+                    buyButtonText.text = buyText;
+                }
+            }
+
+            if (lockStatusText != null)
+            {
+                lockStatusText.gameObject.SetActive(shouldDisableBecauseLocked);
+                lockStatusText.text = shouldDisableBecauseLocked
+                    ? string.Format(lockedTextFormat, requiredCasinoLevel)
+                    : string.Empty;
             }
         }
 
@@ -105,6 +157,12 @@ namespace Project.UI
             if (storeItem == null)
             {
                 Debug.LogError($"{nameof(ShopItemButtonView)} on {name} cannot buy because Store Item is missing.");
+                return;
+            }
+
+            if (!isUnlocked)
+            {
+                Debug.Log($"{storeItem.ItemName} requires casino level {requiredCasinoLevel}.");
                 return;
             }
 

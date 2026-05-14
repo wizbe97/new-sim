@@ -21,6 +21,7 @@ namespace Project.Managers
         private PhoneView phone;
 
         private PlayerBalanceManager playerBalanceManager;
+        private CasinoProgressionManager casinoProgressionManager;
 
         public HUDView HUD => hud;
         public BalanceDisplayView BalanceDisplay => balanceDisplay;
@@ -31,7 +32,9 @@ namespace Project.Managers
         public event Action PhoneClosePressed;
         public event Action<StoreItemSO> ShopItemBuyRequested;
 
-        public void Initialize(PlayerBalanceManager balanceManager)
+        public void Initialize(
+            PlayerBalanceManager balanceManager,
+            CasinoProgressionManager progressionManager)
         {
             if (balanceManager == null)
             {
@@ -39,14 +42,24 @@ namespace Project.Managers
                 return;
             }
 
+            if (progressionManager == null)
+            {
+                Debug.LogError($"{nameof(UIManager)} cannot initialize because CasinoProgressionManager is missing.", this);
+                return;
+            }
+
             playerBalanceManager = balanceManager;
+            casinoProgressionManager = progressionManager;
 
             CreateHUD();
             CreateBalanceDisplay();
             CreatePhone();
 
             SubscribeToBalanceEvents();
+            SubscribeToProgressionEvents();
+
             RefreshBalanceDisplay();
+            RefreshCasinoProgressionDisplay();
         }
 
         public void SetShopOwnershipProvider(Func<StoreItemSO, bool> ownershipProvider)
@@ -57,6 +70,16 @@ namespace Project.Managers
             }
 
             phone.SetOwnershipProvider(ownershipProvider);
+        }
+
+        public void SetShopUnlockProvider(Func<StoreItemSO, bool> unlockProvider)
+        {
+            if (phone == null)
+            {
+                return;
+            }
+
+            phone.SetUnlockProvider(unlockProvider);
         }
 
         public void RefreshPhoneShopItems()
@@ -172,7 +195,7 @@ namespace Project.Managers
 
             balanceDisplay = Instantiate(balanceDisplayPrefab);
             balanceDisplay.name = "BalanceDisplayCanvas";
-            balanceDisplay.SetBalance(0);
+            balanceDisplay.SetFunds(0, 0, 0);
         }
 
         private void CreatePhone()
@@ -197,17 +220,55 @@ namespace Project.Managers
 
         private void SubscribeToBalanceEvents()
         {
-            playerBalanceManager.BalanceChanged += HandleBalanceChanged;
+            playerBalanceManager.FundsChanged += HandleFundsChanged;
+        }
+
+        private void SubscribeToProgressionEvents()
+        {
+            casinoProgressionManager.XpChanged += HandleCasinoXpChanged;
+            casinoProgressionManager.LevelChanged += HandleCasinoLevelChanged;
         }
 
         private void RefreshBalanceDisplay()
         {
-            SetBalance(playerBalanceManager.CurrentBalance);
+            if (balanceDisplay == null || playerBalanceManager == null)
+            {
+                return;
+            }
+
+            balanceDisplay.SetFunds(
+                playerBalanceManager.CurrentCasinoFunds,
+                playerBalanceManager.CurrentReserveFund,
+                playerBalanceManager.MinimumReserveFund);
         }
 
-        private void HandleBalanceChanged(int newBalance)
+        private void RefreshCasinoProgressionDisplay()
         {
-            SetBalance(newBalance);
+            if (hud == null || casinoProgressionManager == null)
+            {
+                return;
+            }
+
+            hud.SetCasinoProgressionDisplay(
+                casinoProgressionManager.CurrentLevel,
+                casinoProgressionManager.CurrentLevelXp,
+                casinoProgressionManager.XpRequiredForNextLevel);
+        }
+
+        private void HandleFundsChanged()
+        {
+            RefreshBalanceDisplay();
+        }
+
+        private void HandleCasinoXpChanged(int currentLevelXp, int xpRequiredForNextLevel)
+        {
+            RefreshCasinoProgressionDisplay();
+        }
+
+        private void HandleCasinoLevelChanged(int newLevel)
+        {
+            RefreshCasinoProgressionDisplay();
+            RefreshBalanceDisplay();
         }
 
         private void HandleShopAppClicked()
@@ -234,7 +295,13 @@ namespace Project.Managers
         {
             if (playerBalanceManager != null)
             {
-                playerBalanceManager.BalanceChanged -= HandleBalanceChanged;
+                playerBalanceManager.FundsChanged -= HandleFundsChanged;
+            }
+
+            if (casinoProgressionManager != null)
+            {
+                casinoProgressionManager.XpChanged -= HandleCasinoXpChanged;
+                casinoProgressionManager.LevelChanged -= HandleCasinoLevelChanged;
             }
 
             if (phone != null)
