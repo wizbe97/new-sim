@@ -122,7 +122,10 @@ namespace Project.UI
 
         public void ShowShopPage()
         {
-            PhonePageCatalogueSO shopPage = FindPageByIdRecursive(startingPage, "shop", new HashSet<PhonePageCatalogueSO>());
+            PhonePageCatalogueSO shopPage = FindPageByIdRecursive(
+                startingPage,
+                "shop",
+                new HashSet<PhonePageCatalogueSO>());
 
             if (shopPage == null)
             {
@@ -191,7 +194,7 @@ namespace Project.UI
                 HandleCloseClicked);
         }
 
-        private void HandleItemClicked(PhonePageItemData item)
+        private void HandleItemClicked(PhonePageItem item)
         {
             if (item == null)
             {
@@ -223,7 +226,7 @@ namespace Project.UI
             }
         }
 
-        private void HandleOpenPageItem(PhonePageItemData item)
+        private void HandleOpenPageItem(PhonePageItem item)
         {
             if (item.TargetPage == null)
             {
@@ -234,7 +237,7 @@ namespace Project.UI
             OpenPage(item.TargetPage, addCurrentPageToHistory: true);
         }
 
-        private void HandleBuyStoreItem(PhonePageItemData item)
+        private void HandleBuyStoreItem(PhonePageItem item)
         {
             if (item.StoreItem == null)
             {
@@ -246,7 +249,7 @@ namespace Project.UI
             RefreshCurrentPage();
         }
 
-        private void HandleOpenSetting(PhonePageItemData item)
+        private void HandleOpenSetting(PhonePageItem item)
         {
             Debug.Log(
                 $"Clicked setting '{item.GetTitle()}' with id '{item.SettingId}' and value '{item.SettingValueText}'.",
@@ -306,7 +309,7 @@ namespace Project.UI
                 return page;
             }
 
-            foreach (PhonePageItemData item in page.Items)
+            foreach (PhonePageItem item in page.Items)
             {
                 if (item == null || item.TargetPage == null)
                 {

@@ -30,7 +30,7 @@ namespace Project.UI.Phone
         private RectTransform activeContentRoot;
         private PhonePageLayoutMode activeLayoutMode;
 
-        public event Action<PhonePageItemData> ItemClicked;
+        public event Action<PhonePageItem> ItemClicked;
 
         public void ShowPage(
             PhonePageCatalogueSO page,
@@ -72,7 +72,7 @@ namespace Project.UI.Phone
 
             HideEmptyState();
 
-            foreach (PhonePageItemData item in page.Items)
+            foreach (PhonePageItem item in page.Items)
             {
                 if (item == null)
                 {
@@ -184,7 +184,7 @@ namespace Project.UI.Phone
             if (listLayoutGroup != null)
             {
                 listLayoutGroup.enabled = true;
-                listLayoutGroup.spacing = page.ListSpacing;
+                listLayoutGroup.spacing = page.ListSettings.Spacing;
                 listLayoutGroup.childAlignment = TextAnchor.UpperCenter;
                 listLayoutGroup.childControlWidth = true;
                 listLayoutGroup.childControlHeight = true;
@@ -214,13 +214,13 @@ namespace Project.UI.Phone
             if (gridLayoutGroup != null)
             {
                 gridLayoutGroup.enabled = true;
-                gridLayoutGroup.cellSize = page.GridCellSize;
-                gridLayoutGroup.spacing = page.GridSpacing;
+                gridLayoutGroup.cellSize = page.GridSettings.CellSize;
+                gridLayoutGroup.spacing = page.GridSettings.Spacing;
                 gridLayoutGroup.startCorner = GridLayoutGroup.Corner.UpperLeft;
                 gridLayoutGroup.startAxis = GridLayoutGroup.Axis.Horizontal;
                 gridLayoutGroup.childAlignment = TextAnchor.UpperLeft;
                 gridLayoutGroup.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-                gridLayoutGroup.constraintCount = page.GridColumnCount;
+                gridLayoutGroup.constraintCount = page.GridSettings.ColumnCount;
             }
 
             if (gridContentSizeFitter != null)
@@ -252,7 +252,7 @@ namespace Project.UI.Phone
             LayoutRebuilder.ForceRebuildLayoutImmediate(activeContentRoot);
         }
 
-        private void HandleItemClicked(PhonePageItemData item)
+        private void HandleItemClicked(PhonePageItem item)
         {
             ItemClicked?.Invoke(item);
         }

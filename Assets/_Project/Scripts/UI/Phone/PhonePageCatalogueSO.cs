@@ -17,29 +17,24 @@ namespace Project.UI.Phone
         [Header("Layout")]
         [SerializeField] private PhonePageLayoutMode layoutMode = PhonePageLayoutMode.VerticalList;
 
-        [Header("Vertical List Settings")]
-        [SerializeField, Min(0f)] private float listSpacing = 12f;
-
-        [Header("Icon Grid Settings")]
-        [SerializeField] private Vector2 gridCellSize = new Vector2(100f, 120f);
-        [SerializeField] private Vector2 gridSpacing = new Vector2(16f, 16f);
-        [SerializeField, Min(1)] private int gridColumnCount = 3;
+        [SerializeField] private PhoneVerticalListLayoutSettings listSettings = new();
+        [SerializeField] private PhoneIconGridLayoutSettings gridSettings = new();
 
         [Header("Items")]
-        [SerializeField] private List<PhonePageItemData> items = new();
+        [SerializeReference] private List<PhonePageItem> items = new();
 
         public string PageId => pageId;
         public string PageTitle => pageTitle;
         public string PageDescription => pageDescription;
         public Sprite PageIcon => pageIcon;
-        public PhonePageLayoutMode LayoutMode => layoutMode;
-        public float ListSpacing => listSpacing;
-        public Vector2 GridCellSize => gridCellSize;
-        public Vector2 GridSpacing => gridSpacing;
-        public int GridColumnCount => gridColumnCount;
-        public IReadOnlyList<PhonePageItemData> Items => items;
 
-        public PhonePageItemData GetItem(int index)
+        public PhonePageLayoutMode LayoutMode => layoutMode;
+        public PhoneVerticalListLayoutSettings ListSettings => listSettings;
+        public PhoneIconGridLayoutSettings GridSettings => gridSettings;
+
+        public IReadOnlyList<PhonePageItem> Items => items;
+
+        public PhonePageItem GetItem(int index)
         {
             if (index < 0 || index >= items.Count)
             {
@@ -64,11 +59,13 @@ namespace Project.UI.Phone
                 pageTitle = name;
             }
 
-            gridCellSize.x = Mathf.Max(1f, gridCellSize.x);
-            gridCellSize.y = Mathf.Max(1f, gridCellSize.y);
-            gridColumnCount = Mathf.Max(1, gridColumnCount);
+            listSettings ??= new PhoneVerticalListLayoutSettings();
+            gridSettings ??= new PhoneIconGridLayoutSettings();
 
-            foreach (PhonePageItemData item in items)
+            listSettings.Validate();
+            gridSettings.Validate();
+
+            foreach (PhonePageItem item in items)
             {
                 item?.Validate();
             }

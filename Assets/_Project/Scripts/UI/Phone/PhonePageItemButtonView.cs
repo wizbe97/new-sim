@@ -22,16 +22,16 @@ namespace Project.UI.Phone
         [SerializeField] private Color lockedTextColour = new Color(1f, 0.65f, 0.1f, 1f);
         [SerializeField] private Color ownedTextColour = new Color(0.4f, 1f, 0.4f, 1f);
 
-        private PhonePageItemData item;
+        private PhonePageItem item;
         private PhonePageContext context;
         private PhonePageLayoutMode layoutMode;
 
         private RectTransform rectTransform;
         private LayoutElement layoutElement;
 
-        public event Action<PhonePageItemData> Clicked;
+        public event Action<PhonePageItem> Clicked;
 
-        public PhonePageItemData Item => item;
+        public PhonePageItem Item => item;
 
         private void Awake()
         {
@@ -58,7 +58,7 @@ namespace Project.UI.Phone
         }
 
         public void Initialize(
-            PhonePageItemData newItem,
+            PhonePageItem newItem,
             PhonePageContext newContext,
             PhonePageLayoutMode newLayoutMode)
         {
@@ -289,7 +289,7 @@ namespace Project.UI.Phone
         private void ApplyState()
         {
             bool canClick = true;
-            string primary = item.GetPrimaryButtonText();
+            string primary = item.GetPrimaryText();
             string secondary = item.GetSecondaryText();
             Color textColour = normalTextColour;
 

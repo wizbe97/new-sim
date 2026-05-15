@@ -1467,7 +1467,7 @@ MonoBehaviour:
   phoneRoot: {fileID: 5294059479585840683}
   modularPageView: {fileID: 1899372354984849380}
   itemButtonPrefab: {fileID: 8203663571072734112, guid: c7c4b824e137d284c933379c12faef80, type: 3}
-  startingPage: {fileID: 11400000, guid: 938074a0addc28c4bbd1e4cccf4d763b, type: 2}
+  startingPage: {fileID: 11400000, guid: 1b0106e76639acc4c8606373721c7ef2, type: 2}
   backButton: {fileID: 7847418297609194611}
   closeButton: {fileID: 8701696152826295828}
 --- !u!1 &6356415914187372719
@@ -1652,7 +1652,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1aa08ab6e0800fa44ae55d278d1423e3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Content: {fileID: 0}
+  m_Content: {fileID: 5996942193693875646}
   m_Horizontal: 0
   m_Vertical: 1
   m_MovementType: 2
@@ -1742,7 +1742,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0.000030517578}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 1}
 --- !u!222 &5895307623502444934
