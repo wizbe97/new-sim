@@ -12,13 +12,28 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9f5abbf015061242800a1511822d5b5, type: 3}
   m_Name: HomePageCatalogue
   m_EditorClassIdentifier: 
-  pageId: new_page
-  pageTitle: New Page
-  pageDescription: Page description.
+  pageId: home
+  pageTitle: Home
+  pageDescription: Home Page
   pageIcon: {fileID: 0}
-  layoutMode: 0
+  layoutMode: 1
   listSpacing: 12
-  gridCellSize: {x: 100, y: 120}
+  gridCellSize: {x: 110, y: 120}
   gridSpacing: {x: 16, y: 16}
   gridColumnCount: 3
-  items: []
+  items:
+  - itemId: shop
+    title: Shop
+    description: Buy Casino Items
+    icon: {fileID: 0}
+    useStoreItemDisplayData: 0
+    primaryButtonText: 
+    secondaryText: 
+    actionType: 1
+    targetPage: {fileID: 11400000, guid: c775ceb025d91d8428fa2dddd3d174d0, type: 2}
+    storeItem: {fileID: 0}
+    settingId: 
+    settingDisplayType: 0
+    settingValueText: 
+    isDisabled: 0
+    disabledReason: 

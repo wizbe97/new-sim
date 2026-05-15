@@ -21,4 +21,19 @@ MonoBehaviour:
   gridCellSize: {x: 100, y: 120}
   gridSpacing: {x: 16, y: 16}
   gridColumnCount: 3
-  items: []
+  items:
+  - itemId: new_item
+    title: New Item
+    description: 
+    icon: {fileID: 0}
+    useStoreItemDisplayData: 0
+    primaryButtonText: 
+    secondaryText: 
+    actionType: 2
+    targetPage: {fileID: 0}
+    storeItem: {fileID: 11400000, guid: 8e7302239e19a34458369559ded35234, type: 2}
+    settingId: 
+    settingDisplayType: 0
+    settingValueText: 
+    isDisabled: 0
+    disabledReason: 
