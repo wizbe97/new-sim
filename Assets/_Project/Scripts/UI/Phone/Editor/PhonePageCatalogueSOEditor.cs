@@ -12,6 +12,8 @@ namespace Project.UI.Phone.Editor
         private SerializedProperty pageDescription;
         private SerializedProperty pageIcon;
 
+        private SerializedProperty scrollWheelSensitivity;
+
         private SerializedProperty layoutMode;
         private SerializedProperty listSettings;
         private SerializedProperty gridSettings;
@@ -25,6 +27,8 @@ namespace Project.UI.Phone.Editor
             pageDescription = serializedObject.FindProperty("pageDescription");
             pageIcon = serializedObject.FindProperty("pageIcon");
 
+            scrollWheelSensitivity = serializedObject.FindProperty("scrollWheelSensitivity");
+
             layoutMode = serializedObject.FindProperty("layoutMode");
             listSettings = serializedObject.FindProperty("listSettings");
             gridSettings = serializedObject.FindProperty("gridSettings");
@@ -37,6 +41,7 @@ namespace Project.UI.Phone.Editor
             serializedObject.Update();
 
             DrawPageIdentity();
+            DrawScrolling();
             DrawLayout();
             DrawItems();
 
@@ -51,6 +56,15 @@ namespace Project.UI.Phone.Editor
             EditorGUILayout.PropertyField(pageTitle);
             EditorGUILayout.PropertyField(pageDescription);
             EditorGUILayout.PropertyField(pageIcon);
+
+            EditorGUILayout.Space(10f);
+        }
+
+        private void DrawScrolling()
+        {
+            EditorGUILayout.LabelField("Scrolling", EditorStyles.boldLabel);
+
+            EditorGUILayout.PropertyField(scrollWheelSensitivity);
 
             EditorGUILayout.Space(10f);
         }

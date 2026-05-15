@@ -26,6 +26,9 @@ namespace Project.UI.Phone
         private PhonePageContext context;
         private PhonePageLayoutMode layoutMode;
 
+        private PhoneVerticalListLayoutSettings listSettings;
+        private PhoneIconGridLayoutSettings gridSettings;
+
         private RectTransform rectTransform;
         private LayoutElement layoutElement;
 
@@ -60,11 +63,15 @@ namespace Project.UI.Phone
         public void Initialize(
             PhonePageItem newItem,
             PhonePageContext newContext,
-            PhonePageLayoutMode newLayoutMode)
+            PhonePageLayoutMode newLayoutMode,
+            PhoneVerticalListLayoutSettings newListSettings,
+            PhoneIconGridLayoutSettings newGridSettings)
         {
             item = newItem;
             context = newContext;
             layoutMode = newLayoutMode;
+            listSettings = newListSettings;
+            gridSettings = newGridSettings;
 
             ConfigureVisualLayout();
             Refresh();
@@ -105,6 +112,8 @@ namespace Project.UI.Phone
             Clicked = null;
             item = null;
             context = null;
+            listSettings = null;
+            gridSettings = null;
         }
 
         private void ConfigureVisualLayout()
@@ -131,6 +140,12 @@ namespace Project.UI.Phone
 
         private void ConfigureGridVisualLayout()
         {
+            if (gridSettings == null)
+            {
+                Debug.LogError($"{nameof(PhonePageItemButtonView)} on {name} is missing grid settings.", this);
+                return;
+            }
+
             if (layoutElement != null)
             {
                 layoutElement.ignoreLayout = false;
@@ -155,14 +170,14 @@ namespace Project.UI.Phone
                 iconRect.anchorMin = new Vector2(0.5f, 1f);
                 iconRect.anchorMax = new Vector2(0.5f, 1f);
                 iconRect.pivot = new Vector2(0.5f, 1f);
-                iconRect.anchoredPosition = new Vector2(0f, -10f);
-                iconRect.sizeDelta = new Vector2(54f, 54f);
+                iconRect.anchoredPosition = gridSettings.IconAnchoredPosition;
+                iconRect.sizeDelta = gridSettings.IconSize;
             }
 
             if (titleText != null)
             {
                 titleText.gameObject.SetActive(true);
-                titleText.fontSize = 13f;
+                titleText.fontSize = gridSettings.TitleFontSize;
                 titleText.alignment = TextAlignmentOptions.Center;
                 titleText.enableWordWrapping = false;
                 titleText.overflowMode = TextOverflowModes.Ellipsis;
@@ -171,8 +186,8 @@ namespace Project.UI.Phone
                 titleRect.anchorMin = new Vector2(0f, 0f);
                 titleRect.anchorMax = new Vector2(1f, 0f);
                 titleRect.pivot = new Vector2(0.5f, 0f);
-                titleRect.offsetMin = new Vector2(6f, 8f);
-                titleRect.offsetMax = new Vector2(-6f, 44f);
+                titleRect.offsetMin = gridSettings.TitleOffsetMin;
+                titleRect.offsetMax = gridSettings.TitleOffsetMax;
             }
 
             if (descriptionText != null)
@@ -193,11 +208,17 @@ namespace Project.UI.Phone
 
         private void ConfigureListVisualLayout()
         {
+            if (listSettings == null)
+            {
+                Debug.LogError($"{nameof(PhonePageItemButtonView)} on {name} is missing list settings.", this);
+                return;
+            }
+
             if (layoutElement != null)
             {
                 layoutElement.ignoreLayout = false;
                 layoutElement.preferredWidth = -1f;
-                layoutElement.preferredHeight = 96f;
+                layoutElement.preferredHeight = listSettings.ItemHeight;
                 layoutElement.flexibleWidth = 1f;
                 layoutElement.flexibleHeight = 0f;
             }
@@ -217,14 +238,14 @@ namespace Project.UI.Phone
                 iconRect.anchorMin = new Vector2(0f, 0.5f);
                 iconRect.anchorMax = new Vector2(0f, 0.5f);
                 iconRect.pivot = new Vector2(0f, 0.5f);
-                iconRect.anchoredPosition = new Vector2(14f, 0f);
-                iconRect.sizeDelta = new Vector2(54f, 54f);
+                iconRect.anchoredPosition = listSettings.IconAnchoredPosition;
+                iconRect.sizeDelta = listSettings.IconSize;
             }
 
             if (titleText != null)
             {
                 titleText.gameObject.SetActive(true);
-                titleText.fontSize = 20f;
+                titleText.fontSize = listSettings.TitleFontSize;
                 titleText.alignment = TextAlignmentOptions.Left;
                 titleText.enableWordWrapping = false;
                 titleText.overflowMode = TextOverflowModes.Ellipsis;
@@ -233,14 +254,14 @@ namespace Project.UI.Phone
                 titleRect.anchorMin = new Vector2(0f, 1f);
                 titleRect.anchorMax = new Vector2(1f, 1f);
                 titleRect.pivot = new Vector2(0f, 1f);
-                titleRect.offsetMin = new Vector2(82f, -36f);
-                titleRect.offsetMax = new Vector2(-110f, -8f);
+                titleRect.offsetMin = listSettings.TitleOffsetMin;
+                titleRect.offsetMax = listSettings.TitleOffsetMax;
             }
 
             if (descriptionText != null)
             {
                 descriptionText.gameObject.SetActive(true);
-                descriptionText.fontSize = 13f;
+                descriptionText.fontSize = listSettings.DescriptionFontSize;
                 descriptionText.alignment = TextAlignmentOptions.TopLeft;
                 descriptionText.enableWordWrapping = true;
                 descriptionText.overflowMode = TextOverflowModes.Ellipsis;
@@ -249,14 +270,14 @@ namespace Project.UI.Phone
                 descriptionRect.anchorMin = new Vector2(0f, 0f);
                 descriptionRect.anchorMax = new Vector2(1f, 1f);
                 descriptionRect.pivot = new Vector2(0f, 0.5f);
-                descriptionRect.offsetMin = new Vector2(82f, 10f);
-                descriptionRect.offsetMax = new Vector2(-110f, -38f);
+                descriptionRect.offsetMin = listSettings.DescriptionOffsetMin;
+                descriptionRect.offsetMax = listSettings.DescriptionOffsetMax;
             }
 
             if (primaryText != null)
             {
                 primaryText.gameObject.SetActive(true);
-                primaryText.fontSize = 15f;
+                primaryText.fontSize = listSettings.PrimaryFontSize;
                 primaryText.alignment = TextAlignmentOptions.Right;
                 primaryText.enableWordWrapping = false;
                 primaryText.overflowMode = TextOverflowModes.Ellipsis;
@@ -265,14 +286,14 @@ namespace Project.UI.Phone
                 primaryRect.anchorMin = new Vector2(1f, 0.5f);
                 primaryRect.anchorMax = new Vector2(1f, 0.5f);
                 primaryRect.pivot = new Vector2(1f, 0.5f);
-                primaryRect.anchoredPosition = new Vector2(-10f, 12f);
-                primaryRect.sizeDelta = new Vector2(95f, 28f);
+                primaryRect.anchoredPosition = listSettings.PrimaryAnchoredPosition;
+                primaryRect.sizeDelta = listSettings.PrimarySize;
             }
 
             if (secondaryText != null)
             {
                 secondaryText.gameObject.SetActive(true);
-                secondaryText.fontSize = 12f;
+                secondaryText.fontSize = listSettings.SecondaryFontSize;
                 secondaryText.alignment = TextAlignmentOptions.Right;
                 secondaryText.enableWordWrapping = false;
                 secondaryText.overflowMode = TextOverflowModes.Ellipsis;
@@ -281,8 +302,8 @@ namespace Project.UI.Phone
                 secondaryRect.anchorMin = new Vector2(1f, 0.5f);
                 secondaryRect.anchorMax = new Vector2(1f, 0.5f);
                 secondaryRect.pivot = new Vector2(1f, 0.5f);
-                secondaryRect.anchoredPosition = new Vector2(-10f, -14f);
-                secondaryRect.sizeDelta = new Vector2(95f, 24f);
+                secondaryRect.anchoredPosition = listSettings.SecondaryAnchoredPosition;
+                secondaryRect.sizeDelta = listSettings.SecondarySize;
             }
         }
 

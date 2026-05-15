@@ -12,18 +12,115 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9f5abbf015061242800a1511822d5b5, type: 3}
   m_Name: ShopPage
   m_EditorClassIdentifier: 
-  pageId: new_page
-  pageTitle: New Page
-  pageDescription: Page description.
-  pageIcon: {fileID: 0}
+  pageId: shop
+  pageTitle: Shop
+  pageDescription: Buy Casino Items
+  pageIcon: {fileID: 21300000, guid: be4ce60e2c9768c44b9b10b9c5258045, type: 3}
+  scrollWheelSensitivity: 30
   layoutMode: 0
   listSettings:
+    settingsVersion: 2
+    padding:
+      left: 12
+      right: 12
+      top: 14
+      bottom: 14
     spacing: 12
+    itemHeight: 96
+    iconSize: {x: 54, y: 54}
+    iconAnchoredPosition: {x: 14, y: 0}
+    titleFontSize: 20
+    titleOffsetMin: {x: 82, y: -36}
+    titleOffsetMax: {x: -150, y: -8}
+    descriptionFontSize: 13
+    descriptionOffsetMin: {x: 82, y: 10}
+    descriptionOffsetMax: {x: -150, y: -38}
+    primaryFontSize: 15
+    primaryAnchoredPosition: {x: -10, y: 12}
+    primarySize: {x: 175, y: 28}
+    secondaryFontSize: 12
+    secondaryAnchoredPosition: {x: -10, y: -14}
+    secondarySize: {x: 135, y: 24}
   gridSettings:
+    settingsVersion: 1
+    padding:
+      left: 0
+      right: 0
+      top: 0
+      bottom: 0
     cellSize: {x: 100, y: 120}
     spacing: {x: 16, y: 16}
     columnCount: 3
-  items: []
+    iconSize: {x: 54, y: 54}
+    iconAnchoredPosition: {x: 0, y: -10}
+    titleFontSize: 13
+    titleOffsetMin: {x: 6, y: 8}
+    titleOffsetMax: {x: -6, y: 44}
+  items:
+  - rid: 7438918895275868160
+  - rid: 7438918895275868161
+  - rid: 7438918895275868162
+  - rid: 7438918895275868164
+  - rid: 7438918895275868165
+  - rid: 7438918895275868166
+  - rid: 7438918895275868167
+  - rid: 7438918895275868168
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 7438918895275868160
+      type: {class: PhoneShopItem, ns: Project.UI.Phone, asm: Assembly-CSharp}
+      data:
+        itemId: new_item
+        isDisabled: 0
+        disabledReason: Unavailable
+        storeItem: {fileID: 11400000, guid: 8e7302239e19a34458369559ded35234, type: 2}
+    - rid: 7438918895275868161
+      type: {class: PhoneShopItem, ns: Project.UI.Phone, asm: Assembly-CSharp}
+      data:
+        itemId: new_item
+        isDisabled: 0
+        disabledReason: Unavailable
+        storeItem: {fileID: 11400000, guid: 7e4d513703b8b0440bd80fead784c5cb, type: 2}
+    - rid: 7438918895275868162
+      type: {class: PhoneShopItem, ns: Project.UI.Phone, asm: Assembly-CSharp}
+      data:
+        itemId: new_item
+        isDisabled: 0
+        disabledReason: Unavailable
+        storeItem: {fileID: 11400000, guid: 591595ecfccc4c14a8c3aa85c79f2eee, type: 2}
+    - rid: 7438918895275868164
+      type: {class: PhoneShopItem, ns: Project.UI.Phone, asm: Assembly-CSharp}
+      data:
+        itemId: new_item
+        isDisabled: 0
+        disabledReason: Unavailable
+        storeItem: {fileID: 11400000, guid: 4171ed9227d879a43adde2cc53bd662d, type: 2}
+    - rid: 7438918895275868165
+      type: {class: PhoneShopItem, ns: Project.UI.Phone, asm: Assembly-CSharp}
+      data:
+        itemId: new_item
+        isDisabled: 0
+        disabledReason: Unavailable
+        storeItem: {fileID: 11400000, guid: dfc4e9a639edd954c942532ea4adb381, type: 2}
+    - rid: 7438918895275868166
+      type: {class: PhoneShopItem, ns: Project.UI.Phone, asm: Assembly-CSharp}
+      data:
+        itemId: new_item
+        isDisabled: 0
+        disabledReason: Unavailable
+        storeItem: {fileID: 11400000, guid: 60973ee538b437e40b203e7e2d011fb8, type: 2}
+    - rid: 7438918895275868167
+      type: {class: PhoneShopItem, ns: Project.UI.Phone, asm: Assembly-CSharp}
+      data:
+        itemId: new_item
+        isDisabled: 0
+        disabledReason: Unavailable
+        storeItem: {fileID: 11400000, guid: 591595ecfccc4c14a8c3aa85c79f2eee, type: 2}
+    - rid: 7438918895275868168
+      type: {class: PhoneShopItem, ns: Project.UI.Phone, asm: Assembly-CSharp}
+      data:
+        itemId: new_item
+        isDisabled: 0
+        disabledReason: Unavailable
+        storeItem: {fileID: 11400000, guid: dfc4e9a639edd954c942532ea4adb381, type: 2}

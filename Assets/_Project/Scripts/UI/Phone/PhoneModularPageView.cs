@@ -50,6 +50,11 @@ namespace Project.UI.Phone
                 pageTitleText.text = page.PageTitle;
             }
 
+            if (scrollRect != null)
+            {
+                scrollRect.scrollSensitivity = page.ScrollWheelSensitivity;
+            }
+
             if (itemButtonPrefab == null)
             {
                 Debug.LogError($"{nameof(PhoneModularPageView)} on {name} is missing Item Button Prefab.", this);
@@ -81,7 +86,14 @@ namespace Project.UI.Phone
 
                 PhonePageItemButtonView itemView = Instantiate(itemButtonPrefab, activeContentRoot);
                 itemView.name = $"PhoneItem_{item.GetTitle()}";
-                itemView.Initialize(item, context, activeLayoutMode);
+
+                itemView.Initialize(
+                    item,
+                    context,
+                    page.LayoutMode,
+                    page.ListSettings,
+                    page.GridSettings);
+
                 itemView.Clicked += HandleItemClicked;
 
                 spawnedItems.Add(itemView);
@@ -181,10 +193,19 @@ namespace Project.UI.Phone
                 listContentSizeFitter = listContentRoot.GetComponent<ContentSizeFitter>();
             }
 
+            PhoneVerticalListLayoutSettings settings = page.ListSettings;
+
+            if (settings == null)
+            {
+                Debug.LogError($"{nameof(PhoneModularPageView)} on {name} cannot configure list layout because List Settings are missing.", this);
+                return;
+            }
+
             if (listLayoutGroup != null)
             {
                 listLayoutGroup.enabled = true;
-                listLayoutGroup.spacing = page.ListSettings.Spacing;
+                listLayoutGroup.padding = settings.Padding.ToRectOffset();
+                listLayoutGroup.spacing = settings.Spacing;
                 listLayoutGroup.childAlignment = TextAnchor.UpperCenter;
                 listLayoutGroup.childControlWidth = true;
                 listLayoutGroup.childControlHeight = true;
@@ -211,16 +232,25 @@ namespace Project.UI.Phone
                 gridContentSizeFitter = gridContentRoot.GetComponent<ContentSizeFitter>();
             }
 
+            PhoneIconGridLayoutSettings settings = page.GridSettings;
+
+            if (settings == null)
+            {
+                Debug.LogError($"{nameof(PhoneModularPageView)} on {name} cannot configure grid layout because Grid Settings are missing.", this);
+                return;
+            }
+
             if (gridLayoutGroup != null)
             {
                 gridLayoutGroup.enabled = true;
-                gridLayoutGroup.cellSize = page.GridSettings.CellSize;
-                gridLayoutGroup.spacing = page.GridSettings.Spacing;
+                gridLayoutGroup.padding = settings.Padding.ToRectOffset();
+                gridLayoutGroup.cellSize = settings.CellSize;
+                gridLayoutGroup.spacing = settings.Spacing;
                 gridLayoutGroup.startCorner = GridLayoutGroup.Corner.UpperLeft;
                 gridLayoutGroup.startAxis = GridLayoutGroup.Axis.Horizontal;
                 gridLayoutGroup.childAlignment = TextAnchor.UpperLeft;
                 gridLayoutGroup.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-                gridLayoutGroup.constraintCount = page.GridSettings.ColumnCount;
+                gridLayoutGroup.constraintCount = settings.ColumnCount;
             }
 
             if (gridContentSizeFitter != null)

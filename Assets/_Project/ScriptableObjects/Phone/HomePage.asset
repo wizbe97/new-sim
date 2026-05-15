@@ -12,18 +12,63 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d9f5abbf015061242800a1511822d5b5, type: 3}
   m_Name: HomePage
   m_EditorClassIdentifier: 
-  pageId: new_page
-  pageTitle: New Page
-  pageDescription: Page description.
+  pageId: home
+  pageTitle: Phone
+  pageDescription: Home Screen
   pageIcon: {fileID: 0}
-  layoutMode: 0
+  scrollWheelSensitivity: 30
+  layoutMode: 1
   listSettings:
+    settingsVersion: 2
+    padding:
+      left: 0
+      right: 0
+      top: 0
+      bottom: 0
     spacing: 12
+    itemHeight: 96
+    iconSize: {x: 54, y: 54}
+    iconAnchoredPosition: {x: 14, y: 0}
+    titleFontSize: 20
+    titleOffsetMin: {x: 82, y: -36}
+    titleOffsetMax: {x: -150, y: -8}
+    descriptionFontSize: 13
+    descriptionOffsetMin: {x: 82, y: 10}
+    descriptionOffsetMax: {x: -150, y: -38}
+    primaryFontSize: 15
+    primaryAnchoredPosition: {x: -10, y: 12}
+    primarySize: {x: 135, y: 28}
+    secondaryFontSize: 12
+    secondaryAnchoredPosition: {x: -10, y: -14}
+    secondarySize: {x: 135, y: 24}
   gridSettings:
+    settingsVersion: 1
+    padding:
+      left: 12
+      right: 12
+      top: 14
+      bottom: 14
     cellSize: {x: 100, y: 120}
     spacing: {x: 16, y: 16}
     columnCount: 3
-  items: []
+    iconSize: {x: 54, y: 54}
+    iconAnchoredPosition: {x: 0, y: -10}
+    titleFontSize: 13
+    titleOffsetMin: {x: 6, y: 8}
+    titleOffsetMax: {x: -6, y: 44}
+  items:
+  - rid: 7438918895275868163
   references:
     version: 2
-    RefIds: []
+    RefIds:
+    - rid: 7438918895275868163
+      type: {class: PhonePageLinkItem, ns: Project.UI.Phone, asm: Assembly-CSharp}
+      data:
+        itemId: new_item
+        isDisabled: 0
+        disabledReason: Unavailable
+        targetPage: {fileID: 11400000, guid: fbb2921e549851549a9c5d742f9afc6a, type: 2}
+        titleOverride: 
+        descriptionOverride: 
+        iconOverride: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
+        primaryText: Open

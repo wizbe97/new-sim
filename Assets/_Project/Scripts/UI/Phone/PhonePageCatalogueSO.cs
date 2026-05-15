@@ -14,6 +14,9 @@ namespace Project.UI.Phone
         [SerializeField, TextArea(2, 5)] private string pageDescription = "Page description.";
         [SerializeField] private Sprite pageIcon;
 
+        [Header("Scrolling")]
+        [SerializeField, Min(0f)] private float scrollWheelSensitivity = 30f;
+
         [Header("Layout")]
         [SerializeField] private PhonePageLayoutMode layoutMode = PhonePageLayoutMode.VerticalList;
 
@@ -27,6 +30,8 @@ namespace Project.UI.Phone
         public string PageTitle => pageTitle;
         public string PageDescription => pageDescription;
         public Sprite PageIcon => pageIcon;
+
+        public float ScrollWheelSensitivity => scrollWheelSensitivity;
 
         public PhonePageLayoutMode LayoutMode => layoutMode;
         public PhoneVerticalListLayoutSettings ListSettings => listSettings;
@@ -44,9 +49,30 @@ namespace Project.UI.Phone
             return items[index];
         }
 
+        private void OnEnable()
+        {
+            EnsureLayoutSettings();
+        }
+
+        private void EnsureLayoutSettings()
+        {
+            listSettings ??= new PhoneVerticalListLayoutSettings();
+            gridSettings ??= new PhoneIconGridLayoutSettings();
+
+            listSettings.EnsureDefaults();
+            gridSettings.EnsureDefaults();
+
+            if (scrollWheelSensitivity <= 0f)
+            {
+                scrollWheelSensitivity = 30f;
+            }
+        }
+
 #if UNITY_EDITOR
         private void OnValidate()
         {
+            EnsureLayoutSettings();
+
             if (string.IsNullOrWhiteSpace(pageId))
             {
                 pageId = name;
@@ -59,8 +85,7 @@ namespace Project.UI.Phone
                 pageTitle = name;
             }
 
-            listSettings ??= new PhoneVerticalListLayoutSettings();
-            gridSettings ??= new PhoneIconGridLayoutSettings();
+            scrollWheelSensitivity = Mathf.Max(0f, scrollWheelSensitivity);
 
             listSettings.Validate();
             gridSettings.Validate();
