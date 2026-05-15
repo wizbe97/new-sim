@@ -53,6 +53,7 @@ namespace Project.Managers
         private Coroutine delayedQueueUpdateRoutine;
 
         public int QueueCount => queue.Count;
+        public bool HasSceneBindings => queueStartPoint != null && ticketPlacementPoint != null;
 
         public void Initialize(
             PlayerBalanceManager balanceManager,
@@ -97,10 +98,31 @@ namespace Project.Managers
             Debug.Log($"{nameof(CashDeskManager)} initialized.", this);
         }
 
+        public void ClearSceneBindings()
+        {
+            if (delayedQueueUpdateRoutine != null)
+            {
+                StopCoroutine(delayedQueueUpdateRoutine);
+                delayedQueueUpdateRoutine = null;
+            }
+
+            queue.Clear();
+
+            queueStartPoint = null;
+            queueFacingTarget = null;
+            ticketPlacementPoint = null;
+        }
+
         public void QueueCustomer(CustomerController customer, CashOutTicket ticket)
         {
             if (customer == null || ticket == null)
             {
+                return;
+            }
+
+            if (!HasSceneBindings)
+            {
+                Debug.LogWarning($"{nameof(CashDeskManager)} cannot queue customer because this scene has no cash desk bindings.", this);
                 return;
             }
 
@@ -236,7 +258,7 @@ namespace Project.Managers
                 delayedQueueUpdateRoutine = null;
             }
 
-            if (queue.Count <= 0)
+            if (queue.Count <= 0 || !HasSceneBindings)
             {
                 return;
             }
@@ -273,6 +295,11 @@ namespace Project.Managers
 
         private void UpdateQueueLayout()
         {
+            if (!HasSceneBindings)
+            {
+                return;
+            }
+
             RemoveInvalidQueueEntries(updateLayoutIfChanged: false);
 
             for (int i = 0; i < queue.Count; i++)

@@ -1,14 +1,14 @@
-using System;
 using Project.Hands;
 using Project.Placement;
 using Project.Shop;
-using Project.Spawning;
 using UnityEngine;
 
 namespace Project.Managers
 {
     public sealed class GameManager : MonoBehaviour
     {
+        public static GameManager Instance { get; private set; }
+
         [Header("Manager Prefabs")]
         [SerializeField] private UIManager uiManagerPrefab;
         [SerializeField] private CursorManager cursorManagerPrefab;
@@ -25,14 +25,6 @@ namespace Project.Managers
         [SerializeField] private CashDeskManager cashDeskManagerPrefab;
         [SerializeField] private CasinoProgressionManager casinoProgressionManagerPrefab;
 
-        [Header("Scene References")]
-        [SerializeField] private PlayerSpawnPoint playerSpawnPoint;
-        [SerializeField] private Transform itemDeliveryPad;
-
-        [Header("Cash Desk Scene References")]
-        [SerializeField] private Transform cashDeskQueueStartPoint;
-        [SerializeField] private Transform cashDeskTicketPlacementPoint;
-
         private UIManager uiManager;
         private CursorManager cursorManager;
         private BuildingManager buildingManager;
@@ -47,6 +39,9 @@ namespace Project.Managers
         private SlotMachineManager slotMachineManager;
         private CashDeskManager cashDeskManager;
         private CasinoProgressionManager casinoProgressionManager;
+
+        private bool hasInitializedGlobalManagers;
+        private bool hasInitializedPlayerManagers;
 
         public UIManager UIManager => uiManager;
         public CursorManager CursorManager => cursorManager;
@@ -65,6 +60,15 @@ namespace Project.Managers
 
         private void Awake()
         {
+            if (Instance != null && Instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+
             SpawnManagers();
 
             if (!HasRequiredManagers())
@@ -73,13 +77,171 @@ namespace Project.Managers
                 return;
             }
 
-            if (!HasRequiredSceneReferences())
+            InitializeGlobalManagers();
+        }
+
+        public void BindScene(SceneReferenceProvider sceneReferences)
+        {
+            if (sceneReferences == null)
             {
-                Debug.LogError($"{nameof(GameManager)} failed to initialize because one or more required scene references are missing.", this);
+                Debug.LogError($"{nameof(GameManager)} cannot bind scene because SceneReferenceProvider is missing.", this);
                 return;
             }
 
-            InitializeManagers();
+            if (!HasRequiredManagers())
+            {
+                Debug.LogError($"{nameof(GameManager)} cannot bind scene because one or more required managers are missing.", this);
+                return;
+            }
+
+            BindPlayerSceneReferences(sceneReferences);
+            BindDeliverySceneReferences(sceneReferences);
+            BindCashDeskSceneReferences(sceneReferences);
+
+            if (slotMachineManager != null)
+            {
+                slotMachineManager.RefreshSceneMachines();
+            }
+        }
+
+        private void BindPlayerSceneReferences(SceneReferenceProvider sceneReferences)
+        {
+            if (!sceneReferences.UsePlayerInScene)
+            {
+                playerManager.SetCurrentPlayerActive(false);
+                return;
+            }
+
+            if (sceneReferences.PlayerSpawnPoint == null)
+            {
+                Debug.LogError($"{nameof(GameManager)} cannot bind player because Player Spawn Point is missing.", sceneReferences);
+                return;
+            }
+
+            playerManager.SpawnOrMovePlayer(
+                uiManager,
+                buildingManager,
+                sceneReferences.PlayerSpawnPoint);
+
+            playerManager.SetCurrentPlayerActive(true);
+
+            InitializePlayerManagersIfNeeded();
+
+            if (cameraManager != null)
+            {
+                cameraManager.Initialize(playerManager.CurrentPlayer);
+            }
+
+            if (buildingManager != null)
+            {
+                buildingManager.Initialize(playerManager.CurrentPlayer);
+            }
+        }
+
+        private void BindDeliverySceneReferences(SceneReferenceProvider sceneReferences)
+        {
+            if (!sceneReferences.UseItemDeliveryInScene)
+            {
+                itemDeliveryManager.ClearDeliveryPad();
+                return;
+            }
+
+            if (sceneReferences.ItemDeliveryPad == null)
+            {
+                Debug.LogError($"{nameof(GameManager)} cannot bind item delivery because Item Delivery Pad is missing.", sceneReferences);
+                itemDeliveryManager.ClearDeliveryPad();
+                return;
+            }
+
+            itemDeliveryManager.Initialize(sceneReferences.ItemDeliveryPad);
+        }
+
+        private void BindCashDeskSceneReferences(SceneReferenceProvider sceneReferences)
+        {
+            if (!sceneReferences.UseCashDeskInScene)
+            {
+                cashDeskManager.ClearSceneBindings();
+                return;
+            }
+
+            if (sceneReferences.CashDeskQueueStartPoint == null ||
+                sceneReferences.CashDeskTicketPlacementPoint == null)
+            {
+                Debug.LogError($"{nameof(GameManager)} cannot bind cash desk because cash desk scene references are missing.", sceneReferences);
+                cashDeskManager.ClearSceneBindings();
+                return;
+            }
+
+            cashDeskManager.Initialize(
+                playerBalanceManager,
+                sceneReferences.CashDeskQueueStartPoint,
+                sceneReferences.CashDeskTicketPlacementPoint,
+                casinoProgressionManager);
+        }
+
+        private void InitializeGlobalManagers()
+        {
+            if (hasInitializedGlobalManagers)
+            {
+                return;
+            }
+
+            hasInitializedGlobalManagers = true;
+
+            casinoProgressionManager.Initialize();
+
+            playerBalanceManager.Initialize(casinoProgressionManager);
+
+            shopPurchaseService.Initialize(
+                playerBalanceManager,
+                itemDeliveryManager,
+                casinoProgressionManager);
+
+            uiManager.Initialize(
+                playerBalanceManager,
+                casinoProgressionManager);
+
+            shopUIController.Initialize(
+                uiManager,
+                shopPurchaseService,
+                casinoProgressionManager);
+
+            cursorManager.Initialize(uiManager);
+        }
+
+        private void InitializePlayerManagersIfNeeded()
+        {
+            if (hasInitializedPlayerManagers)
+            {
+                return;
+            }
+
+            if (playerManager.CurrentPlayer == null)
+            {
+                Debug.LogError($"{nameof(GameManager)} cannot initialize player managers because no player exists.", this);
+                return;
+            }
+
+            hasInitializedPlayerManagers = true;
+
+            cameraManager.Initialize(playerManager.CurrentPlayer);
+            buildingManager.Initialize(playerManager.CurrentPlayer);
+
+            phoneManager.Initialize(
+                playerManager.CurrentPlayer,
+                uiManager,
+                cursorManager);
+
+            inHandManager.Initialize(
+                playerManager.CurrentPlayer,
+                buildingManager,
+                casinoProgressionManager);
+
+            slotMachineManager.Initialize(
+                playerManager.CurrentPlayer,
+                playerBalanceManager,
+                cursorManager,
+                casinoProgressionManager);
         }
 
         private void SpawnManagers()
@@ -100,46 +262,18 @@ namespace Project.Managers
             casinoProgressionManager = SpawnManager(casinoProgressionManagerPrefab, nameof(CasinoProgressionManager));
         }
 
-        private void InitializeManagers()
+        private T SpawnManager<T>(T prefab, string managerName) where T : MonoBehaviour
         {
-            Action[] initializationSteps =
+            if (prefab == null)
             {
-                () => casinoProgressionManager.Initialize(),
-                () => playerBalanceManager.Initialize(casinoProgressionManager),
-                () => itemDeliveryManager.Initialize(itemDeliveryPad),
-                () => shopPurchaseService.Initialize(playerBalanceManager, itemDeliveryManager, casinoProgressionManager),
-                () => uiManager.Initialize(playerBalanceManager, casinoProgressionManager),
-                () => shopUIController.Initialize(uiManager, shopPurchaseService, casinoProgressionManager),
-
-                () =>
-                {
-                    playerManager.SetFallbackSpawnPoint(playerSpawnPoint);
-                    playerManager.Initialize(uiManager, buildingManager);
-                },
-
-                () => cameraManager.Initialize(playerManager.CurrentPlayer),
-                () => buildingManager.Initialize(playerManager.CurrentPlayer),
-                () => cursorManager.Initialize(uiManager),
-                () => phoneManager.Initialize(playerManager.CurrentPlayer, uiManager, cursorManager),
-                () => inHandManager.Initialize(playerManager.CurrentPlayer, buildingManager, casinoProgressionManager),
-
-                () => slotMachineManager.Initialize(
-                    playerManager.CurrentPlayer,
-                    playerBalanceManager,
-                    cursorManager,
-                    casinoProgressionManager),
-
-                () => cashDeskManager.Initialize(
-                    playerBalanceManager,
-                    cashDeskQueueStartPoint,
-                    cashDeskTicketPlacementPoint,
-                    casinoProgressionManager)
-            };
-
-            foreach (Action initializeStep in initializationSteps)
-            {
-                initializeStep.Invoke();
+                Debug.LogError($"{nameof(GameManager)} is missing {managerName} prefab.", this);
+                return null;
             }
+
+            T instance = Instantiate(prefab, transform);
+            instance.name = managerName;
+
+            return instance;
         }
 
         private bool HasRequiredManagers()
@@ -162,51 +296,6 @@ namespace Project.Managers
             hasRequiredManagers &= ValidateManager(casinoProgressionManager, nameof(CasinoProgressionManager));
 
             return hasRequiredManagers;
-        }
-
-        private bool HasRequiredSceneReferences()
-        {
-            bool hasRequiredSceneReferences = true;
-
-            if (playerSpawnPoint == null)
-            {
-                Debug.LogError($"{nameof(GameManager)} is missing Player Spawn Point scene reference.", this);
-                hasRequiredSceneReferences = false;
-            }
-
-            if (itemDeliveryPad == null)
-            {
-                Debug.LogError($"{nameof(GameManager)} is missing Item Delivery Pad scene reference.", this);
-                hasRequiredSceneReferences = false;
-            }
-
-            if (cashDeskQueueStartPoint == null)
-            {
-                Debug.LogError($"{nameof(GameManager)} is missing Cash Desk Queue Start Point scene reference.", this);
-                hasRequiredSceneReferences = false;
-            }
-
-            if (cashDeskTicketPlacementPoint == null)
-            {
-                Debug.LogError($"{nameof(GameManager)} is missing Cash Desk Ticket Placement Point scene reference.", this);
-                hasRequiredSceneReferences = false;
-            }
-
-            return hasRequiredSceneReferences;
-        }
-
-        private T SpawnManager<T>(T prefab, string managerName) where T : MonoBehaviour
-        {
-            if (prefab == null)
-            {
-                Debug.LogError($"{nameof(GameManager)} is missing {managerName} prefab.", this);
-                return null;
-            }
-
-            T instance = Instantiate(prefab);
-            instance.name = managerName;
-
-            return instance;
         }
 
         private bool ValidateManager<T>(T manager, string managerName) where T : MonoBehaviour

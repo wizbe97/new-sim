@@ -18,12 +18,38 @@ namespace Project.Managers
 
         public void Initialize(UIManager uiManager, BuildingManager buildingManager)
         {
-            SpawnPlayer(uiManager, buildingManager);
+            SpawnOrMovePlayer(uiManager, buildingManager, fallbackSpawnPoint);
         }
 
         public void SetFallbackSpawnPoint(PlayerSpawnPoint spawnPoint)
         {
             fallbackSpawnPoint = spawnPoint;
+        }
+
+        public void SpawnOrMovePlayer(
+            UIManager uiManager,
+            BuildingManager buildingManager,
+            PlayerSpawnPoint spawnPoint)
+        {
+            fallbackSpawnPoint = spawnPoint;
+
+            if (currentPlayer == null)
+            {
+                SpawnPlayer(uiManager, buildingManager);
+                return;
+            }
+
+            MovePlayerToSpawnPoint(ResolveSpawnPoint());
+        }
+
+        public void SetCurrentPlayerActive(bool isActive)
+        {
+            if (currentPlayer == null)
+            {
+                return;
+            }
+
+            currentPlayer.gameObject.SetActive(isActive);
         }
 
         private void SpawnPlayer(UIManager uiManager, BuildingManager buildingManager)
@@ -47,8 +73,8 @@ namespace Project.Managers
             currentPlayer = Instantiate(
                 playerPrefab,
                 spawnPosition,
-                spawnRotation
-            );
+                spawnRotation,
+                transform);
 
             currentPlayer.name = "Player";
 
@@ -63,6 +89,18 @@ namespace Project.Managers
             {
                 Debug.LogWarning($"{nameof(PlayerManager)} spawned a player without a PlayerInteractionController.", currentPlayer);
             }
+        }
+
+        private void MovePlayerToSpawnPoint(PlayerSpawnPoint spawnPoint)
+        {
+            if (currentPlayer == null || spawnPoint == null)
+            {
+                return;
+            }
+
+            currentPlayer.transform.SetPositionAndRotation(
+                spawnPoint.Position,
+                spawnPoint.Rotation);
         }
 
         private PlayerSpawnPoint ResolveSpawnPoint()

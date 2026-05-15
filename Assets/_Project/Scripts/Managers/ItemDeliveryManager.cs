@@ -22,15 +22,23 @@ namespace Project.Managers
         [SerializeField] private float deliveredBoxAngularDrag = 0.05f;
         [SerializeField] private Vector3 randomTorqueRange = new Vector3(3f, 3f, 3f);
 
+        public bool HasDeliveryPad => deliveryPad != null;
+
         public void Initialize(Transform deliveryPadTransform)
         {
             if (deliveryPadTransform == null)
             {
                 Debug.LogError($"{nameof(ItemDeliveryManager)} cannot initialize because Delivery Pad is missing.", this);
+                ClearDeliveryPad();
                 return;
             }
 
             deliveryPad = deliveryPadTransform;
+        }
+
+        public void ClearDeliveryPad()
+        {
+            deliveryPad = null;
         }
 
         public bool DeliverItem(StoreItemSO storeItem)
@@ -45,8 +53,7 @@ namespace Project.Managers
             {
                 Debug.LogError(
                     $"{nameof(ItemDeliveryManager)} cannot deliver {storeItem.ItemName} because it has no Placeable Prefab assigned.",
-                    storeItem
-                );
+                    storeItem);
 
                 return false;
             }
@@ -55,15 +62,14 @@ namespace Project.Managers
             {
                 Debug.LogError(
                     $"{nameof(ItemDeliveryManager)} cannot deliver {storeItem.ItemName} because it has no Delivery Box Prefab assigned.",
-                    storeItem
-                );
+                    storeItem);
 
                 return false;
             }
 
             if (deliveryPad == null)
             {
-                Debug.LogError($"{nameof(ItemDeliveryManager)} cannot deliver {storeItem.ItemName} because Delivery Pad is missing.", this);
+                Debug.LogWarning($"{nameof(ItemDeliveryManager)} cannot deliver {storeItem.ItemName} because this scene has no Delivery Pad.", this);
                 return false;
             }
 
@@ -97,8 +103,7 @@ namespace Project.Managers
             return new Vector3(
                 basePosition.x + finalOffset.x,
                 spawnHeight + finalOffset.y,
-                basePosition.z + finalOffset.z
-            );
+                basePosition.z + finalOffset.z);
         }
 
         private Rigidbody ConfigurePhysics(GameObject deliveredObject)
@@ -141,8 +146,7 @@ namespace Project.Managers
             Vector3 randomTorque = new Vector3(
                 Random.Range(-randomTorqueRange.x, randomTorqueRange.x),
                 Random.Range(-randomTorqueRange.y, randomTorqueRange.y),
-                Random.Range(-randomTorqueRange.z, randomTorqueRange.z)
-            );
+                Random.Range(-randomTorqueRange.z, randomTorqueRange.z));
 
             rigidbody.AddTorque(randomTorque, ForceMode.Impulse);
         }

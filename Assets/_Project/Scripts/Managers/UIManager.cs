@@ -177,7 +177,7 @@ namespace Project.Managers
                 return;
             }
 
-            hud = Instantiate(hudPrefab);
+            hud = Instantiate(hudPrefab, transform);
             hud.name = "HUDCanvas";
 
             hud.ShowReticle();
@@ -192,7 +192,7 @@ namespace Project.Managers
                 return;
             }
 
-            balanceDisplay = Instantiate(balanceDisplayPrefab);
+            balanceDisplay = Instantiate(balanceDisplayPrefab, transform);
             balanceDisplay.name = "BalanceDisplayCanvas";
             balanceDisplay.SetFunds(0, 0, 0);
         }
@@ -205,7 +205,7 @@ namespace Project.Managers
                 return;
             }
 
-            phone = Instantiate(phonePrefab);
+            phone = Instantiate(phonePrefab, transform);
             phone.name = "PhoneCanvas";
             phone.Initialize(this);
 

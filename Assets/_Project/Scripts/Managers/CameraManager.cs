@@ -20,32 +20,35 @@ namespace Project.Managers
         {
             if (player == null)
             {
-                Debug.LogError($"{nameof(CameraManager)} cannot initialize without a player.");
+                Debug.LogError($"{nameof(CameraManager)} cannot initialize without a player.", this);
                 return;
             }
 
-            CreateFirstPersonCamera(player);
+            CreateOrBindFirstPersonCamera(player);
         }
 
-        private void CreateFirstPersonCamera(FirstPersonController player)
+        private void CreateOrBindFirstPersonCamera(FirstPersonController player)
         {
             if (firstPersonCameraPrefab == null)
             {
-                Debug.LogError($"{nameof(CameraManager)} is missing a Cinemachine virtual camera prefab.");
+                Debug.LogError($"{nameof(CameraManager)} is missing a Cinemachine virtual camera prefab.", this);
                 return;
             }
 
             if (player.CameraTarget == null)
             {
-                Debug.LogError($"{nameof(CameraManager)} cannot find player's CameraTarget.");
+                Debug.LogError($"{nameof(CameraManager)} cannot find player's CameraTarget.", player);
                 return;
             }
 
-            activeCamera = Instantiate(firstPersonCameraPrefab);
-            activeCamera.name = "PlayerCinemachineCamera";
+            if (activeCamera == null)
+            {
+                activeCamera = Instantiate(firstPersonCameraPrefab, transform);
+                activeCamera.name = "PlayerCinemachineCamera";
+                activeCamera.Priority = firstPersonCameraPriority;
+            }
 
             activeCamera.Follow = player.CameraTarget;
-            activeCamera.Priority = firstPersonCameraPriority;
         }
     }
 }

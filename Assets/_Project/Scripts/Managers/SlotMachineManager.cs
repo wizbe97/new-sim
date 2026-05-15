@@ -72,7 +72,7 @@ namespace Project.Managers
                 inputHandler.CancelPressed += HandleCancelPressed;
             }
 
-            RegisterExistingMachines();
+            RefreshSceneMachines();
             CreateCollectionPanelIfNeeded();
             HideCollectionPanel();
 
@@ -226,18 +226,6 @@ namespace Project.Managers
             casinoProgressionManager.AddConfiguredXp(source, multiplier);
         }
 
-        private void RegisterExistingMachines()
-        {
-            registeredMachines.RemoveAll(machine => machine == null);
-
-            SlotMachine[] existingMachines = FindObjectsByType<SlotMachine>(FindObjectsSortMode.None);
-
-            foreach (SlotMachine machine in existingMachines)
-            {
-                Register(machine);
-            }
-        }
-
         private void CreateCollectionPanelIfNeeded()
         {
             if (collectionPanelView != null)
@@ -306,6 +294,18 @@ namespace Project.Managers
             }
 
             return Mathf.Max(0f, slotMachine.Config.CasinoXpMultiplier);
+        }
+
+        public void RefreshSceneMachines()
+        {
+            registeredMachines.RemoveAll(machine => machine == null);
+
+            SlotMachine[] sceneMachines = FindObjectsByType<SlotMachine>(FindObjectsSortMode.None);
+
+            foreach (SlotMachine machine in sceneMachines)
+            {
+                Register(machine);
+            }
         }
 
         private void HandleCloseRequested()
