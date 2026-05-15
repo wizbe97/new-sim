@@ -55,8 +55,8 @@ namespace Project.Managers
             PlayerInputHandler inputHandler,
             FirstPersonController movementController,
             PlayerInteractionController interactionController,
-            UIManager uiManager,
-            CursorManager cursorManager)
+            UIManager newUIManager,
+            CursorManager newCursorManager)
         {
             if (inputHandler == null)
             {
@@ -76,13 +76,13 @@ namespace Project.Managers
                 return;
             }
 
-            if (uiManager == null)
+            if (newUIManager == null)
             {
                 Debug.LogError($"{nameof(PhoneManager)} cannot initialize because UIManager is missing.");
                 return;
             }
 
-            if (cursorManager == null)
+            if (newCursorManager == null)
             {
                 Debug.LogError($"{nameof(PhoneManager)} cannot initialize because CursorManager is missing.");
                 return;
@@ -92,14 +92,12 @@ namespace Project.Managers
             firstPersonController = movementController;
             playerInteractionController = interactionController;
 
-            this.uiManager = uiManager;
-            this.cursorManager = cursorManager;
+            uiManager = newUIManager;
+            cursorManager = newCursorManager;
 
             playerInputHandler.PhoneMenuPressed += HandlePhoneMenuPressed;
             playerInputHandler.CancelPressed += HandleCancelPressed;
 
-            uiManager.ShopAppPressed += HandleShopAppPressed;
-            uiManager.PhoneBackPressed += HandlePhoneBackPressed;
             uiManager.PhoneClosePressed += HandlePhoneClosePressed;
 
             ClosePhone();
@@ -118,26 +116,6 @@ namespace Project.Managers
             }
 
             ClosePhone();
-        }
-
-        private void HandleShopAppPressed()
-        {
-            if (!isPhoneOpen)
-            {
-                return;
-            }
-
-            uiManager.ShowPhoneShopPage();
-        }
-
-        private void HandlePhoneBackPressed()
-        {
-            if (!isPhoneOpen)
-            {
-                return;
-            }
-
-            uiManager.ShowPhoneHomePage();
         }
 
         private void HandlePhoneClosePressed()
@@ -210,8 +188,6 @@ namespace Project.Managers
 
             if (uiManager != null)
             {
-                uiManager.ShopAppPressed -= HandleShopAppPressed;
-                uiManager.PhoneBackPressed -= HandlePhoneBackPressed;
                 uiManager.PhoneClosePressed -= HandlePhoneClosePressed;
             }
         }

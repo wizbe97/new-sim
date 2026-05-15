@@ -27,7 +27,6 @@ namespace Project.Managers
         public BalanceDisplayView BalanceDisplay => balanceDisplay;
         public PhoneView Phone => phone;
 
-        public event Action ShopAppPressed;
         public event Action PhoneBackPressed;
         public event Action PhoneClosePressed;
         public event Action<StoreItemSO> ShopItemBuyRequested;
@@ -89,7 +88,7 @@ namespace Project.Managers
                 return;
             }
 
-            phone.RefreshShopItems();
+            phone.RefreshCurrentPage();
         }
 
         public void SetReticleVisible(bool isVisible)
@@ -208,8 +207,8 @@ namespace Project.Managers
 
             phone = Instantiate(phonePrefab);
             phone.name = "PhoneCanvas";
+            phone.Initialize(this);
 
-            phone.ShopAppClicked += HandleShopAppClicked;
             phone.BackClicked += HandlePhoneBackClicked;
             phone.CloseClicked += HandlePhoneCloseClicked;
             phone.ShopItemBuyClicked += HandleShopItemBuyClicked;
@@ -271,11 +270,6 @@ namespace Project.Managers
             RefreshBalanceDisplay();
         }
 
-        private void HandleShopAppClicked()
-        {
-            ShopAppPressed?.Invoke();
-        }
-
         private void HandlePhoneBackClicked()
         {
             PhoneBackPressed?.Invoke();
@@ -306,7 +300,6 @@ namespace Project.Managers
 
             if (phone != null)
             {
-                phone.ShopAppClicked -= HandleShopAppClicked;
                 phone.BackClicked -= HandlePhoneBackClicked;
                 phone.CloseClicked -= HandlePhoneCloseClicked;
                 phone.ShopItemBuyClicked -= HandleShopItemBuyClicked;

@@ -46,4 +46,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   hudPrefab: {fileID: 5985103341132305055, guid: da5df7c7ea653264fa8d50999bfe8a5c, type: 3}
   balanceDisplayPrefab: {fileID: 7131747596251650552, guid: 6431bd1d730c10044a0e6fa5c4d83bc3, type: 3}
-  phonePrefab: {fileID: 5659252188068794426, guid: 15b451cedeb8c264cba5f472d60cd031, type: 3}
+  phonePrefab: {fileID: 6953217396481637304, guid: 0d3f4dfa3f010f444bdde51f9218532a, type: 3}

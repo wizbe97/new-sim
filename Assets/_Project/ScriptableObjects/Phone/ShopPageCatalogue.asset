@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d9f5abbf015061242800a1511822d5b5, type: 3}
+  m_Name: ShopPageCatalogue
+  m_EditorClassIdentifier: 
+  pageId: new_page
+  pageTitle: New Page
+  pageDescription: Page description.
+  pageIcon: {fileID: 0}
+  layoutMode: 0
+  listSpacing: 12
+  gridCellSize: {x: 100, y: 120}
+  gridSpacing: {x: 16, y: 16}
+  gridColumnCount: 3
+  items: []

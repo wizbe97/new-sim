@@ -1,12 +1,13 @@
 using System;
-using Project.Shop;
+using Project.UI.Phone;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Object = UnityEngine.Object;
 
-namespace Project.UI
+namespace Project.Shop
 {
-    public sealed class ShopItemButtonView : MonoBehaviour
+    public sealed class ShopItemButtonView : MonoBehaviour, IPhoneCatalogueItemView
     {
         [Header("References")]
         [SerializeField] private TextMeshProUGUI itemNameText;
@@ -20,12 +21,14 @@ namespace Project.UI
         [SerializeField] private TextMeshProUGUI lockStatusText;
 
         [Header("Formatting")]
-        [SerializeField] private string currencyPrefix = "$";
+        [SerializeField] private string currencyPrefix = "£";
         [SerializeField] private string buyText = "Buy";
         [SerializeField] private string ownedText = "Owned";
         [SerializeField] private string lockedTextFormat = "Requires Level {0}";
 
         private StoreItemSO storeItem;
+        private PhonePageContext context;
+
         private bool isOwned;
         private bool isUnlocked = true;
         private int requiredCasinoLevel = 1;
@@ -48,6 +51,31 @@ namespace Project.UI
             {
                 buyButton.onClick.RemoveListener(HandleBuyButtonClicked);
             }
+        }
+
+        public void Initialize(Object item, PhonePageContext newContext)
+        {
+            StoreItemSO newStoreItem = item as StoreItemSO;
+
+            if (newStoreItem == null)
+            {
+                Debug.LogError($"{nameof(ShopItemButtonView)} on {name} expected a {nameof(StoreItemSO)} item.", this);
+                return;
+            }
+
+            context = newContext;
+
+            Initialize(
+                newStoreItem,
+                context != null && context.IsShopItemOwned(newStoreItem),
+                context == null || context.IsShopItemUnlocked(newStoreItem),
+                newStoreItem.RequiredCasinoLevel);
+        }
+
+        public void Dispose()
+        {
+            context = null;
+            BuyPressed = null;
         }
 
         public void Initialize(StoreItemSO item, bool owned)
@@ -92,8 +120,14 @@ namespace Project.UI
         {
             if (storeItem == null)
             {
-                Debug.LogError($"{nameof(ShopItemButtonView)} on {name} cannot refresh because Store Item is missing.");
+                Debug.LogError($"{nameof(ShopItemButtonView)} on {name} cannot refresh because Store Item is missing.", this);
                 return;
+            }
+
+            if (context != null)
+            {
+                isOwned = context.IsShopItemOwned(storeItem);
+                isUnlocked = context.IsShopItemUnlocked(storeItem);
             }
 
             if (itemNameText != null)
@@ -156,19 +190,25 @@ namespace Project.UI
         {
             if (storeItem == null)
             {
-                Debug.LogError($"{nameof(ShopItemButtonView)} on {name} cannot buy because Store Item is missing.");
+                Debug.LogError($"{nameof(ShopItemButtonView)} on {name} cannot buy because Store Item is missing.", this);
                 return;
             }
 
             if (!isUnlocked)
             {
-                Debug.Log($"{storeItem.ItemName} requires casino level {requiredCasinoLevel}.");
+                Debug.Log($"{storeItem.ItemName} requires casino level {requiredCasinoLevel}.", storeItem);
                 return;
             }
 
             if (storeItem.IsUniqueItem && isOwned)
             {
-                Debug.Log($"{storeItem.ItemName} is unique and has already been purchased.");
+                Debug.Log($"{storeItem.ItemName} is unique and has already been purchased.", storeItem);
+                return;
+            }
+
+            if (context != null)
+            {
+                context.RequestShopItemPurchase(storeItem);
                 return;
             }
 
