@@ -29,12 +29,16 @@ namespace Project.UI.Phone
         private PhoneVerticalListLayoutSettings listSettings;
         private PhoneIconGridLayoutSettings gridSettings;
 
+        private int effectiveListColumnCount = 1;
+        private bool showDetailedDescriptions = true;
+
         private RectTransform rectTransform;
         private LayoutElement layoutElement;
 
         public event Action<PhonePageItem> Clicked;
 
         public PhonePageItem Item => item;
+        public PhoneVerticalListLayoutSettings ListSettings => listSettings;
 
         private void Awake()
         {
@@ -65,13 +69,17 @@ namespace Project.UI.Phone
             PhonePageContext newContext,
             PhonePageLayoutMode newLayoutMode,
             PhoneVerticalListLayoutSettings newListSettings,
-            PhoneIconGridLayoutSettings newGridSettings)
+            PhoneIconGridLayoutSettings newGridSettings,
+            int newEffectiveListColumnCount,
+            bool newShowDetailedDescriptions)
         {
             item = newItem;
             context = newContext;
             layoutMode = newLayoutMode;
             listSettings = newListSettings;
             gridSettings = newGridSettings;
+            effectiveListColumnCount = Mathf.Max(1, newEffectiveListColumnCount);
+            showDetailedDescriptions = newShowDetailedDescriptions;
 
             ConfigureVisualLayout();
             Refresh();
@@ -114,6 +122,8 @@ namespace Project.UI.Phone
             context = null;
             listSettings = null;
             gridSettings = null;
+            effectiveListColumnCount = 1;
+            showDetailedDescriptions = true;
         }
 
         private void ConfigureVisualLayout()
@@ -214,12 +224,14 @@ namespace Project.UI.Phone
                 return;
             }
 
+            bool isCompactColumnView = effectiveListColumnCount > 1 && !showDetailedDescriptions;
+
             if (layoutElement != null)
             {
                 layoutElement.ignoreLayout = false;
                 layoutElement.preferredWidth = -1f;
                 layoutElement.preferredHeight = listSettings.ItemHeight;
-                layoutElement.flexibleWidth = 1f;
+                layoutElement.flexibleWidth = effectiveListColumnCount > 1 ? 0f : 1f;
                 layoutElement.flexibleHeight = 0f;
             }
 
@@ -247,31 +259,53 @@ namespace Project.UI.Phone
                 titleText.gameObject.SetActive(true);
                 titleText.fontSize = listSettings.TitleFontSize;
                 titleText.alignment = TextAlignmentOptions.Left;
-                titleText.enableWordWrapping = false;
-                titleText.overflowMode = TextOverflowModes.Ellipsis;
+                titleText.fontStyle = FontStyles.Bold;
+                titleText.enableWordWrapping = isCompactColumnView;
+                titleText.overflowMode = isCompactColumnView
+                    ? TextOverflowModes.Overflow
+                    : TextOverflowModes.Ellipsis;
 
                 RectTransform titleRect = titleText.rectTransform;
-                titleRect.anchorMin = new Vector2(0f, 1f);
-                titleRect.anchorMax = new Vector2(1f, 1f);
-                titleRect.pivot = new Vector2(0f, 1f);
-                titleRect.offsetMin = listSettings.TitleOffsetMin;
-                titleRect.offsetMax = listSettings.TitleOffsetMax;
+
+                if (isCompactColumnView)
+                {
+                    titleRect.anchorMin = new Vector2(0f, 0f);
+                    titleRect.anchorMax = new Vector2(1f, 1f);
+                    titleRect.pivot = new Vector2(0f, 0.5f);
+                    titleRect.offsetMin = new Vector2(listSettings.TitleOffsetMin.x, 8f);
+                    titleRect.offsetMax = new Vector2(listSettings.TitleOffsetMax.x, -8f);
+                }
+                else
+                {
+                    titleRect.anchorMin = new Vector2(0f, 1f);
+                    titleRect.anchorMax = new Vector2(1f, 1f);
+                    titleRect.pivot = new Vector2(0f, 1f);
+                    titleRect.offsetMin = listSettings.TitleOffsetMin;
+                    titleRect.offsetMax = listSettings.TitleOffsetMax;
+                }
             }
 
             if (descriptionText != null)
             {
-                descriptionText.gameObject.SetActive(true);
-                descriptionText.fontSize = listSettings.DescriptionFontSize;
-                descriptionText.alignment = TextAlignmentOptions.TopLeft;
-                descriptionText.enableWordWrapping = true;
-                descriptionText.overflowMode = TextOverflowModes.Ellipsis;
+                bool showDescription = showDetailedDescriptions && effectiveListColumnCount <= 1;
 
-                RectTransform descriptionRect = descriptionText.rectTransform;
-                descriptionRect.anchorMin = new Vector2(0f, 0f);
-                descriptionRect.anchorMax = new Vector2(1f, 1f);
-                descriptionRect.pivot = new Vector2(0f, 0.5f);
-                descriptionRect.offsetMin = listSettings.DescriptionOffsetMin;
-                descriptionRect.offsetMax = listSettings.DescriptionOffsetMax;
+                descriptionText.gameObject.SetActive(showDescription);
+
+                if (showDescription)
+                {
+                    descriptionText.fontSize = listSettings.DescriptionFontSize;
+                    descriptionText.alignment = TextAlignmentOptions.TopLeft;
+                    descriptionText.fontStyle = FontStyles.Normal;
+                    descriptionText.enableWordWrapping = true;
+                    descriptionText.overflowMode = TextOverflowModes.Ellipsis;
+
+                    RectTransform descriptionRect = descriptionText.rectTransform;
+                    descriptionRect.anchorMin = new Vector2(0f, 0f);
+                    descriptionRect.anchorMax = new Vector2(1f, 1f);
+                    descriptionRect.pivot = new Vector2(0f, 0.5f);
+                    descriptionRect.offsetMin = listSettings.DescriptionOffsetMin;
+                    descriptionRect.offsetMax = listSettings.DescriptionOffsetMax;
+                }
             }
 
             if (primaryText != null)
@@ -357,6 +391,16 @@ namespace Project.UI.Phone
                 secondaryText.gameObject.SetActive(
                     layoutMode == PhonePageLayoutMode.VerticalList &&
                     !string.IsNullOrWhiteSpace(secondary));
+            }
+
+            if (descriptionText != null)
+            {
+                bool showDescription =
+                    layoutMode == PhonePageLayoutMode.VerticalList &&
+                    showDetailedDescriptions &&
+                    effectiveListColumnCount <= 1;
+
+                descriptionText.gameObject.SetActive(showDescription);
             }
         }
 

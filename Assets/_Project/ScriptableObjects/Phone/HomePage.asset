@@ -19,13 +19,14 @@ MonoBehaviour:
   scrollWheelSensitivity: 30
   layoutMode: 1
   listSettings:
-    settingsVersion: 2
+    settingsVersion: 3
     padding:
       left: 0
       right: 0
       top: 0
       bottom: 0
     spacing: 12
+    columnCount: 1
     itemHeight: 96
     iconSize: {x: 54, y: 54}
     iconAnchoredPosition: {x: 14, y: 0}
@@ -48,7 +49,7 @@ MonoBehaviour:
       right: 12
       top: 14
       bottom: 14
-    cellSize: {x: 100, y: 120}
+    cellSize: {x: 120, y: 120}
     spacing: {x: 16, y: 16}
     columnCount: 3
     iconSize: {x: 54, y: 54}

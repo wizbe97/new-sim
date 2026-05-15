@@ -19,22 +19,23 @@ MonoBehaviour:
   scrollWheelSensitivity: 30
   layoutMode: 0
   listSettings:
-    settingsVersion: 2
+    settingsVersion: 3
     padding:
       left: 12
       right: 12
       top: 14
       bottom: 14
     spacing: 12
+    columnCount: 2
     itemHeight: 96
     iconSize: {x: 54, y: 54}
     iconAnchoredPosition: {x: 14, y: 0}
     titleFontSize: 20
-    titleOffsetMin: {x: 82, y: -36}
+    titleOffsetMin: {x: 82, y: -65}
     titleOffsetMax: {x: -150, y: -8}
     descriptionFontSize: 13
     descriptionOffsetMin: {x: 82, y: 10}
-    descriptionOffsetMax: {x: -150, y: -38}
+    descriptionOffsetMax: {x: -150, y: -55}
     primaryFontSize: 15
     primaryAnchoredPosition: {x: -10, y: 12}
     primarySize: {x: 175, y: 28}

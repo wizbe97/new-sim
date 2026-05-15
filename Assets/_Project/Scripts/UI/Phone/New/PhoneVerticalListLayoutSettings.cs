@@ -6,13 +6,16 @@ namespace Project.UI.Phone
     [Serializable]
     public sealed class PhoneVerticalListLayoutSettings
     {
-        private const int CurrentSettingsVersion = 2;
+        private const int CurrentSettingsVersion = 3;
 
         [SerializeField, HideInInspector] private int settingsVersion;
 
         [Header("Content Layout")]
         [SerializeField] private PhoneLayoutPadding padding = new();
         [SerializeField, Min(0f)] private float spacing = 12f;
+
+        [Header("Columns")]
+        [SerializeField, Min(1)] private int columnCount = 1;
 
         [Header("Item Size")]
         [SerializeField, Min(1f)] private float itemHeight = 96f;
@@ -43,6 +46,7 @@ namespace Project.UI.Phone
 
         public PhoneLayoutPadding Padding => padding;
         public float Spacing => spacing;
+        public int ColumnCount => columnCount;
         public float ItemHeight => itemHeight;
 
         public Vector2 IconSize => iconSize;
@@ -82,6 +86,7 @@ namespace Project.UI.Phone
                     spacing = 12f;
                 }
 
+                columnCount = 1;
                 itemHeight = 96f;
 
                 iconSize = new Vector2(54f, 54f);
@@ -124,6 +129,15 @@ namespace Project.UI.Phone
                 {
                     descriptionOffsetMax.x = -150f;
                 }
+
+                columnCount = 1;
+            }
+            else if (settingsVersion == 2)
+            {
+                if (columnCount <= 0)
+                {
+                    columnCount = 1;
+                }
             }
 
             settingsVersion = CurrentSettingsVersion;
@@ -143,6 +157,7 @@ namespace Project.UI.Phone
             padding.Validate();
 
             spacing = Mathf.Max(0f, spacing);
+            columnCount = Mathf.Max(1, columnCount);
             itemHeight = Mathf.Max(1f, itemHeight);
 
             iconSize.x = Mathf.Max(1f, iconSize.x);
