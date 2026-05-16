@@ -80,11 +80,18 @@ Assets/_Project/Scripts/
   SlotMachineManager.cs
   UIManager.cs
  NPC/Customer/
+  CustomerCashDeskBehaviour.cs
   CustomerController.cs
+  CustomerDecisionLogic.cs
   CustomerMood.cs
+  CustomerMovement.cs
   CustomerProfileSO.cs
   CustomerRunetimeStats.cs
+  CustomerSlotMachineBehaviour.cs
+  CustomerSlotSearchResult.cs
   CustomerStake.cs
+  CustomerState.cs
+  CustomerTicketHolder.cs
  NPC/Spawning/
   CustomerSpawner.cs
   CustomerSpawnPoint.cs

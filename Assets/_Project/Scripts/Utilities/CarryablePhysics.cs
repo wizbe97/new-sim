@@ -32,11 +32,13 @@ namespace Project.Hands
 
                 rb.velocity = Vector3.zero;
                 rb.angularVelocity = Vector3.zero;
-                rb.useGravity = false;
-                rb.isKinematic = true;
-                rb.detectCollisions = false;
+
                 rb.collisionDetectionMode = CollisionDetectionMode.Discrete;
                 rb.interpolation = RigidbodyInterpolation.None;
+
+                rb.useGravity = false;
+                rb.detectCollisions = false;
+                rb.isKinematic = true;
             }
 
             Collider[] colliders = GetComponentsInChildren<Collider>(true);
