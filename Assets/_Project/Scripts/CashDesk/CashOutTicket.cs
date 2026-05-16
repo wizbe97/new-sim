@@ -238,7 +238,7 @@ namespace Project.CashDesk
             TextMeshPro text = textObject.AddComponent<TextMeshPro>();
             text.alignment = TextAlignmentOptions.Center;
             text.fontSize = valueTextFontSize;
-            text.enableWordWrapping = false;
+            text.textWrappingMode = TextWrappingModes.NoWrap;
             text.richText = false;
             text.rectTransform.sizeDelta = new Vector2(8f, 2f);
 

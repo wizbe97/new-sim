@@ -189,7 +189,7 @@ namespace Project.UI.Phone
                 titleText.gameObject.SetActive(true);
                 titleText.fontSize = gridSettings.TitleFontSize;
                 titleText.alignment = TextAlignmentOptions.Center;
-                titleText.enableWordWrapping = false;
+                titleText.textWrappingMode = TextWrappingModes.NoWrap;
                 titleText.overflowMode = TextOverflowModes.Ellipsis;
 
                 RectTransform titleRect = titleText.rectTransform;
@@ -260,7 +260,9 @@ namespace Project.UI.Phone
                 titleText.fontSize = listSettings.TitleFontSize;
                 titleText.alignment = TextAlignmentOptions.Left;
                 titleText.fontStyle = FontStyles.Bold;
-                titleText.enableWordWrapping = isCompactColumnView;
+                titleText.textWrappingMode = isCompactColumnView
+                    ? TextWrappingModes.Normal
+                    : TextWrappingModes.NoWrap;
                 titleText.overflowMode = isCompactColumnView
                     ? TextOverflowModes.Overflow
                     : TextOverflowModes.Ellipsis;
@@ -296,7 +298,7 @@ namespace Project.UI.Phone
                     descriptionText.fontSize = listSettings.DescriptionFontSize;
                     descriptionText.alignment = TextAlignmentOptions.TopLeft;
                     descriptionText.fontStyle = FontStyles.Normal;
-                    descriptionText.enableWordWrapping = true;
+                    descriptionText.textWrappingMode = TextWrappingModes.Normal;
                     descriptionText.overflowMode = TextOverflowModes.Ellipsis;
 
                     RectTransform descriptionRect = descriptionText.rectTransform;
@@ -313,7 +315,7 @@ namespace Project.UI.Phone
                 primaryText.gameObject.SetActive(true);
                 primaryText.fontSize = listSettings.PrimaryFontSize;
                 primaryText.alignment = TextAlignmentOptions.Right;
-                primaryText.enableWordWrapping = false;
+                primaryText.textWrappingMode = TextWrappingModes.NoWrap;
                 primaryText.overflowMode = TextOverflowModes.Ellipsis;
 
                 RectTransform primaryRect = primaryText.rectTransform;
@@ -329,7 +331,7 @@ namespace Project.UI.Phone
                 secondaryText.gameObject.SetActive(true);
                 secondaryText.fontSize = listSettings.SecondaryFontSize;
                 secondaryText.alignment = TextAlignmentOptions.Right;
-                secondaryText.enableWordWrapping = false;
+                secondaryText.textWrappingMode = TextWrappingModes.NoWrap;
                 secondaryText.overflowMode = TextOverflowModes.Ellipsis;
 
                 RectTransform secondaryRect = secondaryText.rectTransform;
