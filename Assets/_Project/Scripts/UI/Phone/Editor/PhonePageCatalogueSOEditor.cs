@@ -168,10 +168,19 @@ namespace Project.UI.Phone.Editor
 
             EditorGUILayout.BeginHorizontal();
 
+            if (GUILayout.Button("Add Staff Item"))
+            {
+                AddItem(new PhoneStaffItem());
+            }
+
             if (GUILayout.Button("Add Setting"))
             {
                 AddItem(new PhoneSettingItem());
             }
+
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.BeginHorizontal();
 
             if (GUILayout.Button("Add Close Item"))
             {

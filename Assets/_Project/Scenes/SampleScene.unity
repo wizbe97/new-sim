@@ -1806,6 +1806,7 @@ MonoBehaviour:
   slotMachineManagerPrefab: {fileID: 7544985407992816715, guid: 8cbc19aa3c8972844807d8c61f3d554d, type: 3}
   cashDeskManagerPrefab: {fileID: 5966065495916259965, guid: cdf7af7d146fc54408e5e051d0f02bd6, type: 3}
   casinoProgressionManagerPrefab: {fileID: 8898349467512948988, guid: 935fc7eab8bb88743b37d95ec80be3b0, type: 3}
+  staffManagerPrefab: {fileID: 8116346475331800055, guid: 326f0c20f49de6146bb3d00cb5aefafb, type: 3}
 --- !u!4 &1678277871
 Transform:
   m_ObjectHideFlags: 0

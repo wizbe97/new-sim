@@ -5,6 +5,7 @@ namespace Project.UI.Phone
         None,
         OpenPage,
         BuyStoreItem,
+        HireStaffMember,
         OpenSetting,
         ClosePhone
     }

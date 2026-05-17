@@ -10,21 +10,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: d9f5abbf015061242800a1511822d5b5, type: 3}
-  m_Name: HomePage
+  m_Name: StaffPage
   m_EditorClassIdentifier: 
-  pageId: home
-  pageTitle: Phone
-  pageDescription: Home Screen
-  pageIcon: {fileID: 0}
+  pageId: staff
+  pageTitle: Hire Staff
+  pageDescription: Hire some staff to assist
+  pageIcon: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
   scrollWheelSensitivity: 30
-  layoutMode: 1
+  layoutMode: 0
   listSettings:
     settingsVersion: 3
     padding:
-      left: 0
-      right: 0
-      top: 0
-      bottom: 0
+      left: 12
+      right: 12
+      top: 14
+      bottom: 14
     spacing: 12
     columnCount: 1
     itemHeight: 96
@@ -45,11 +45,11 @@ MonoBehaviour:
   gridSettings:
     settingsVersion: 1
     padding:
-      left: 12
-      right: 12
-      top: 14
-      bottom: 14
-    cellSize: {x: 120, y: 120}
+      left: 0
+      right: 0
+      top: 0
+      bottom: 0
+    cellSize: {x: 100, y: 120}
     spacing: {x: 16, y: 16}
     columnCount: 3
     iconSize: {x: 54, y: 54}
@@ -58,30 +58,14 @@ MonoBehaviour:
     titleOffsetMin: {x: 6, y: 8}
     titleOffsetMax: {x: -6, y: 44}
   items:
-  - rid: 7438918895275868163
-  - rid: 7438918939936030772
+  - rid: 7438918939936030773
   references:
     version: 2
     RefIds:
-    - rid: 7438918895275868163
-      type: {class: PhonePageLinkItem, ns: Project.UI.Phone, asm: Assembly-CSharp}
+    - rid: 7438918939936030773
+      type: {class: PhoneStaffItem, ns: Project.UI.Phone, asm: Assembly-CSharp}
       data:
         itemId: new_item
         isDisabled: 0
         disabledReason: Unavailable
-        targetPage: {fileID: 11400000, guid: fbb2921e549851549a9c5d742f9afc6a, type: 2}
-        titleOverride: 
-        descriptionOverride: 
-        iconOverride: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
-        primaryText: Open
-    - rid: 7438918939936030772
-      type: {class: PhonePageLinkItem, ns: Project.UI.Phone, asm: Assembly-CSharp}
-      data:
-        itemId: staff
-        isDisabled: 0
-        disabledReason: Unavailable
-        targetPage: {fileID: 11400000, guid: bf93f786efec0614f81338ba6bbb6107, type: 2}
-        titleOverride: 
-        descriptionOverride: 
-        iconOverride: {fileID: 0}
-        primaryText: Open
+        staffMember: {fileID: 11400000, guid: ce0968891829a414eb0d5d358f7b445d, type: 2}

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Project.Managers;
 using Project.Shop;
+using Project.Staff;
 using Project.UI.Phone;
 using UnityEngine;
 using UnityEngine.UI;
@@ -27,14 +28,18 @@ namespace Project.UI
         public event Action BackClicked;
         public event Action CloseClicked;
         public event Action<StoreItemSO> ShopItemBuyClicked;
+        public event Action<StaffMemberSO> StaffHireClicked;
 
         private readonly Stack<PhonePageCatalogueSO> pageHistory = new();
 
         private UIManager owningUIManager;
         private PhonePageCatalogueSO currentPage;
 
-        private Func<StoreItemSO, bool> ownershipProvider;
-        private Func<StoreItemSO, bool> unlockProvider;
+        private Func<StoreItemSO, bool> shopOwnershipProvider;
+        private Func<StoreItemSO, bool> shopUnlockProvider;
+
+        private Func<StaffMemberSO, bool> staffOwnershipProvider;
+        private Func<StaffMemberSO, bool> staffUnlockProvider;
 
         private void Awake()
         {
@@ -82,13 +87,25 @@ namespace Project.UI
 
         public void SetOwnershipProvider(Func<StoreItemSO, bool> provider)
         {
-            ownershipProvider = provider;
+            shopOwnershipProvider = provider;
             RefreshCurrentPage();
         }
 
         public void SetUnlockProvider(Func<StoreItemSO, bool> provider)
         {
-            unlockProvider = provider;
+            shopUnlockProvider = provider;
+            RefreshCurrentPage();
+        }
+
+        public void SetStaffOwnershipProvider(Func<StaffMemberSO, bool> provider)
+        {
+            staffOwnershipProvider = provider;
+            RefreshCurrentPage();
+        }
+
+        public void SetStaffUnlockProvider(Func<StaffMemberSO, bool> provider)
+        {
+            staffUnlockProvider = provider;
             RefreshCurrentPage();
         }
 
@@ -134,6 +151,22 @@ namespace Project.UI
             }
 
             OpenPage(shopPage, addCurrentPageToHistory: true);
+        }
+
+        public void ShowStaffPage()
+        {
+            PhonePageCatalogueSO staffPage = FindPageByIdRecursive(
+                startingPage,
+                "staff",
+                new HashSet<PhonePageCatalogueSO>());
+
+            if (staffPage == null)
+            {
+                Debug.LogError($"{nameof(PhoneView)} could not find a page with id 'staff'.", this);
+                return;
+            }
+
+            OpenPage(staffPage, addCurrentPageToHistory: true);
         }
 
         public void RefreshCurrentPage()
@@ -188,9 +221,12 @@ namespace Project.UI
             return new PhonePageContext(
                 this,
                 owningUIManager,
-                ownershipProvider,
-                unlockProvider,
+                shopOwnershipProvider,
+                shopUnlockProvider,
                 HandleShopItemBuyRequested,
+                staffOwnershipProvider,
+                staffUnlockProvider,
+                HandleStaffHireRequested,
                 HandleCloseClicked);
         }
 
@@ -209,6 +245,10 @@ namespace Project.UI
 
                 case PhonePageItemActionType.BuyStoreItem:
                     HandleBuyStoreItem(item);
+                    break;
+
+                case PhonePageItemActionType.HireStaffMember:
+                    HandleHireStaffMember(item);
                     break;
 
                 case PhonePageItemActionType.OpenSetting:
@@ -249,6 +289,18 @@ namespace Project.UI
             RefreshCurrentPage();
         }
 
+        private void HandleHireStaffMember(PhonePageItem item)
+        {
+            if (item.StaffMember == null)
+            {
+                Debug.LogError($"Phone item '{item.GetTitle()}' cannot hire because Staff Member is missing.", this);
+                return;
+            }
+
+            HandleStaffHireRequested(item.StaffMember);
+            RefreshCurrentPage();
+        }
+
         private void HandleOpenSetting(PhonePageItem item)
         {
             Debug.Log(
@@ -277,6 +329,11 @@ namespace Project.UI
         private void HandleShopItemBuyRequested(StoreItemSO storeItem)
         {
             ShopItemBuyClicked?.Invoke(storeItem);
+        }
+
+        private void HandleStaffHireRequested(StaffMemberSO staffMember)
+        {
+            StaffHireClicked?.Invoke(staffMember);
         }
 
         private void RefreshBackButton()

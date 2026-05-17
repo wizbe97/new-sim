@@ -1,5 +1,6 @@
 using System;
 using Project.Shop;
+using Project.Staff;
 using Project.UI;
 using UnityEngine;
 
@@ -30,6 +31,7 @@ namespace Project.Managers
         public event Action PhoneBackPressed;
         public event Action PhoneClosePressed;
         public event Action<StoreItemSO> ShopItemBuyRequested;
+        public event Action<StaffMemberSO> StaffHireRequested;
 
         public void Initialize(
             PlayerBalanceManager balanceManager,
@@ -81,7 +83,37 @@ namespace Project.Managers
             phone.SetUnlockProvider(unlockProvider);
         }
 
+        public void SetStaffOwnershipProvider(Func<StaffMemberSO, bool> ownershipProvider)
+        {
+            if (phone == null)
+            {
+                return;
+            }
+
+            phone.SetStaffOwnershipProvider(ownershipProvider);
+        }
+
+        public void SetStaffUnlockProvider(Func<StaffMemberSO, bool> unlockProvider)
+        {
+            if (phone == null)
+            {
+                return;
+            }
+
+            phone.SetStaffUnlockProvider(unlockProvider);
+        }
+
         public void RefreshPhoneShopItems()
+        {
+            if (phone == null)
+            {
+                return;
+            }
+
+            phone.RefreshCurrentPage();
+        }
+
+        public void RefreshPhoneStaffItems()
         {
             if (phone == null)
             {
@@ -169,6 +201,16 @@ namespace Project.Managers
             phone.ShowShopPage();
         }
 
+        public void ShowPhoneStaffPage()
+        {
+            if (phone == null)
+            {
+                return;
+            }
+
+            phone.ShowStaffPage();
+        }
+
         private void CreateHUD()
         {
             if (hudPrefab == null)
@@ -212,6 +254,7 @@ namespace Project.Managers
             phone.BackClicked += HandlePhoneBackClicked;
             phone.CloseClicked += HandlePhoneCloseClicked;
             phone.ShopItemBuyClicked += HandleShopItemBuyClicked;
+            phone.StaffHireClicked += HandleStaffHireClicked;
 
             phone.ShowHomePage();
             phone.Hide();
@@ -257,6 +300,7 @@ namespace Project.Managers
         private void HandleFundsChanged()
         {
             RefreshBalanceDisplay();
+            RefreshPhoneStaffItems();
         }
 
         private void HandleCasinoXpChanged(int currentLevelXp, int xpRequiredForNextLevel)
@@ -268,6 +312,7 @@ namespace Project.Managers
         {
             RefreshCasinoProgressionDisplay();
             RefreshBalanceDisplay();
+            RefreshPhoneStaffItems();
         }
 
         private void HandlePhoneBackClicked()
@@ -283,6 +328,11 @@ namespace Project.Managers
         private void HandleShopItemBuyClicked(StoreItemSO storeItem)
         {
             ShopItemBuyRequested?.Invoke(storeItem);
+        }
+
+        private void HandleStaffHireClicked(StaffMemberSO staffMember)
+        {
+            StaffHireRequested?.Invoke(staffMember);
         }
 
         private void OnDestroy()
@@ -303,6 +353,7 @@ namespace Project.Managers
                 phone.BackClicked -= HandlePhoneBackClicked;
                 phone.CloseClicked -= HandlePhoneCloseClicked;
                 phone.ShopItemBuyClicked -= HandleShopItemBuyClicked;
+                phone.StaffHireClicked -= HandleStaffHireClicked;
             }
         }
     }

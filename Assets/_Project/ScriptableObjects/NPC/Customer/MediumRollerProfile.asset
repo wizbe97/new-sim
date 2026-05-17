@@ -13,16 +13,28 @@ MonoBehaviour:
   m_Name: MediumRollerProfile
   m_EditorClassIdentifier: 
   profileName: Medium Roller Customer
-  stake: 1
+  stake: 0
   lowRollerMinBalance: 50
   lowRollerMaxBalance: 200
   mediumRollerMinBalance: 200
   mediumRollerMaxBalance: 1000
   highRollerMinBalance: 1000
   highRollerMaxBalance: 5000
-  basePatienceSpins: 16
-  contentQuitChance: 0.25
-  frustratedQuitChance: 0.55
-  angryQuitChance: 0.9
   minDepositPercent: 0.25
   maxDepositPercent: 1
+  redepositChanceWhenSlotCreditHitsZero: 0.5
+  minimumTicketCashOutAmount: 10
+  satisfiedBalanceMultiplier: 1.5
+  frustratedBalanceMultiplier: 0.5
+  angryBalanceMultiplier: 0.2
+  minimumSessionSpinsBeforeLeaving: 25
+  minimumSpinsAfterBecomingSatisfiedBeforeLeaving: 5
+  maximumSessionSpins: 80
+  satisfiedLeaveChance: 0.45
+  frustratedLeaveChance: 0.35
+  angryLeaveChance: 0.8
+  standStillWhileWaitingChance: 0.35
+  minIdleWaitSeconds: 2
+  maxIdleWaitSeconds: 6
+  maxNoMachineWaitingActionsBeforeLeaving: 5
+  wanderAfterMachineChance: 0.35

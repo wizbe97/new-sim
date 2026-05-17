@@ -1,5 +1,6 @@
 using System;
 using Project.Shop;
+using Project.Staff;
 using UnityEngine;
 
 namespace Project.UI.Phone
@@ -25,6 +26,7 @@ namespace Project.UI.Phone
 
         public virtual PhonePageCatalogueSO TargetPage => null;
         public virtual StoreItemSO StoreItem => null;
+        public virtual StaffMemberSO StaffMember => null;
 
         public virtual string SettingId => string.Empty;
         public virtual PhoneSettingDisplayType SettingDisplayType => PhoneSettingDisplayType.Info;

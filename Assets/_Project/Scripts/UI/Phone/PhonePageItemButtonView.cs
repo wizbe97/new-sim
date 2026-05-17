@@ -1,5 +1,6 @@
 using System;
 using Project.Shop;
+using Project.Staff;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -360,6 +361,10 @@ namespace Project.UI.Phone
             {
                 ApplyStoreItemState(ref canClick, ref primary, ref secondary, ref textColour);
             }
+            else if (item.ActionType == PhonePageItemActionType.HireStaffMember)
+            {
+                ApplyStaffMemberState(ref canClick, ref primary, ref secondary, ref textColour);
+            }
             else if (item.ActionType == PhonePageItemActionType.None)
             {
                 canClick = false;
@@ -445,6 +450,56 @@ namespace Project.UI.Phone
 
             canClick = true;
             primary = $"Buy £{storeItem.Price:N0}";
+        }
+
+        private void ApplyStaffMemberState(
+            ref bool canClick,
+            ref string primary,
+            ref string secondary,
+            ref Color textColour)
+        {
+            StaffMemberSO staffMember = item.StaffMember;
+
+            if (staffMember == null)
+            {
+                canClick = false;
+                primary = "Missing Staff";
+                textColour = disabledTextColour;
+                return;
+            }
+
+            if (staffMember.Prefab == null)
+            {
+                canClick = false;
+                primary = "Missing Prefab";
+                textColour = disabledTextColour;
+                secondary = "Invalid";
+                return;
+            }
+
+            bool isUnlocked = context == null || context.IsStaffMemberUnlocked(staffMember);
+            bool isHired = context != null && context.IsStaffMemberHired(staffMember);
+
+            if (!isUnlocked)
+            {
+                canClick = false;
+                primary = $"Requires Level {staffMember.RequiredCasinoLevel}";
+                textColour = lockedTextColour;
+                secondary = "Locked";
+                return;
+            }
+
+            if (staffMember.IsUniqueHire && isHired)
+            {
+                canClick = false;
+                primary = "Hired";
+                textColour = ownedTextColour;
+                secondary = "Employed";
+                return;
+            }
+
+            canClick = true;
+            primary = $"Hire £{staffMember.UnlockCost:N0}";
         }
 
         private void HandleClicked()

@@ -24,6 +24,7 @@ namespace Project.Managers
         [SerializeField] private SlotMachineManager slotMachineManagerPrefab;
         [SerializeField] private CashDeskManager cashDeskManagerPrefab;
         [SerializeField] private CasinoProgressionManager casinoProgressionManagerPrefab;
+        [SerializeField] private StaffManager staffManagerPrefab;
 
         private UIManager uiManager;
         private CursorManager cursorManager;
@@ -39,6 +40,7 @@ namespace Project.Managers
         private SlotMachineManager slotMachineManager;
         private CashDeskManager cashDeskManager;
         private CasinoProgressionManager casinoProgressionManager;
+        private StaffManager staffManager;
 
         private bool hasInitializedGlobalManagers;
         private bool hasInitializedPlayerManagers;
@@ -57,6 +59,7 @@ namespace Project.Managers
         public SlotMachineManager SlotMachineManager => slotMachineManager;
         public CashDeskManager CashDeskManager => cashDeskManager;
         public CasinoProgressionManager CasinoProgressionManager => casinoProgressionManager;
+        public StaffManager StaffManager => staffManager;
 
         private void Awake()
         {
@@ -143,6 +146,7 @@ namespace Project.Managers
             if (!sceneReferences.UseItemDeliveryInScene)
             {
                 itemDeliveryManager.ClearDeliveryPad();
+                staffManager.ClearDeliveryPad();
                 return;
             }
 
@@ -150,10 +154,12 @@ namespace Project.Managers
             {
                 Debug.LogError($"{nameof(GameManager)} cannot bind item delivery because Item Delivery Pad is missing.", sceneReferences);
                 itemDeliveryManager.ClearDeliveryPad();
+                staffManager.ClearDeliveryPad();
                 return;
             }
 
             itemDeliveryManager.Initialize(sceneReferences.ItemDeliveryPad);
+            staffManager.InitializeDeliveryPad(sceneReferences.ItemDeliveryPad);
         }
 
         private void BindCashDeskSceneReferences(SceneReferenceProvider sceneReferences)
@@ -200,6 +206,11 @@ namespace Project.Managers
             uiManager.Initialize(
                 playerBalanceManager,
                 casinoProgressionManager);
+
+            staffManager.Initialize(
+                playerBalanceManager,
+                casinoProgressionManager,
+                uiManager);
 
             shopUIController.Initialize(
                 uiManager,
@@ -260,6 +271,7 @@ namespace Project.Managers
             slotMachineManager = SpawnManager(slotMachineManagerPrefab, nameof(SlotMachineManager));
             cashDeskManager = SpawnManager(cashDeskManagerPrefab, nameof(CashDeskManager));
             casinoProgressionManager = SpawnManager(casinoProgressionManagerPrefab, nameof(CasinoProgressionManager));
+            staffManager = SpawnManager(staffManagerPrefab, nameof(StaffManager));
         }
 
         private T SpawnManager<T>(T prefab, string managerName) where T : MonoBehaviour
@@ -294,6 +306,7 @@ namespace Project.Managers
             hasRequiredManagers &= ValidateManager(slotMachineManager, nameof(SlotMachineManager));
             hasRequiredManagers &= ValidateManager(cashDeskManager, nameof(CashDeskManager));
             hasRequiredManagers &= ValidateManager(casinoProgressionManager, nameof(CasinoProgressionManager));
+            hasRequiredManagers &= ValidateManager(staffManager, nameof(StaffManager));
 
             return hasRequiredManagers;
         }
