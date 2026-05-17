@@ -171,6 +171,7 @@ namespace Project.NPC.Customer
                 }
 
                 int ticketAmount = 0;
+                bool slotCreditHitZero = false;
 
                 if (currentSlotMachineBecameUnavailable)
                 {
@@ -200,7 +201,7 @@ namespace Project.NPC.Customer
                 }
                 else
                 {
-                    reservedSlotMachine.EndSessionWithoutTicket(owner);
+                    slotCreditHitZero = true;
                 }
 
                 if (ticketAmount > 0 && !ticketHolder.HasTicket)
@@ -230,6 +231,12 @@ namespace Project.NPC.Customer
                 if (stats.WalletBalance <= 0)
                 {
                     stats.SetMood(CustomerMood.Broke);
+
+                    if (slotCreditHitZero)
+                    {
+                        EndZeroCreditSessionWithoutRedeposit();
+                    }
+
                     keepPlayingThisMachine = false;
                     continue;
                 }
@@ -239,8 +246,6 @@ namespace Project.NPC.Customer
                     keepPlayingThisMachine = false;
                     continue;
                 }
-
-                bool slotCreditHitZero = ticketAmount <= 0;
 
                 if (!slotCreditHitZero)
                 {
@@ -257,16 +262,25 @@ namespace Project.NPC.Customer
                         Debug.Log($"{name}'s slot credit hit £0 and they chose not to redeposit.", this);
                     }
 
+                    EndZeroCreditSessionWithoutRedeposit();
+
                     keepPlayingThisMachine = false;
                     continue;
                 }
 
                 if (logSessionSummary)
                 {
-                    Debug.Log($"{name}'s slot credit hit £0 and they chose to redeposit.", this);
+                    Debug.Log($"{name}'s slot credit hit £0 and they are considering a redeposit while keeping the machine reserved.", this);
                 }
 
                 yield return new WaitForSeconds(profile.GetRandomIdleWaitSeconds());
+
+                if (currentSlotMachineBecameUnavailable)
+                {
+                    continue;
+                }
+
+                EndZeroCreditSessionBeforeRedeposit();
             }
         }
 
@@ -314,6 +328,37 @@ namespace Project.NPC.Customer
             }
 
             return reservedSlotMachine.MachineCredit >= profile.MinimumTicketCashOutAmount;
+        }
+
+        private void EndZeroCreditSessionWithoutRedeposit()
+        {
+            if (reservedSlotMachine == null)
+            {
+                return;
+            }
+
+            reservedSlotMachine.EndSessionWithoutTicket(owner);
+        }
+
+        private void EndZeroCreditSessionBeforeRedeposit()
+        {
+            if (reservedSlotMachine == null)
+            {
+                return;
+            }
+
+            reservedSlotMachine.EndSessionWithoutTicket(owner);
+
+            bool reservedAgain = reservedSlotMachine.TryReserve(owner);
+
+            if (logSessionSummary)
+            {
+                Debug.Log(
+                    reservedAgain
+                        ? $"{name} kept {reservedSlotMachine.name} reserved and is redepositing."
+                        : $"{name} ended the £0 session and will attempt to continue using {reservedSlotMachine.name}.",
+                    this);
+            }
         }
     }
 }
