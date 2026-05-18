@@ -24,21 +24,21 @@ namespace Project.Staff
         [Header("Salary")]
         [SerializeField, Min(0)] private int dailySalary = 50;
 
-        [Header("Work Speeds")]
-        [Tooltip("Higher values mean this staff member collects slot machine cash faster.")]
-        [SerializeField, Min(0f)] private float slotCollectionSpeed = 1f;
+        [Header("Work Durations")]
+        [Tooltip("Seconds required to collect slot machine cash after reaching the collection point.")]
+        [SerializeField, Min(0f)] private float slotCollectionSpeed = 5f;
 
-        [Tooltip("Higher values mean this staff member handles table games faster later.")]
-        [SerializeField, Min(0f)] private float tableGameSpeed = 1f;
+        [Tooltip("Seconds required to handle table game tasks later.")]
+        [SerializeField, Min(0f)] private float tableGameSpeed = 5f;
 
-        [Tooltip("Higher values mean this staff member cleans mess faster later.")]
-        [SerializeField, Min(0f)] private float cleaningSpeed = 1f;
+        [Tooltip("Seconds required to clean mess later.")]
+        [SerializeField, Min(0f)] private float cleaningSpeed = 5f;
 
-        [Tooltip("Higher values mean this staff member repairs machines faster later.")]
-        [SerializeField, Min(0f)] private float repairSpeed = 1f;
+        [Tooltip("Seconds required to repair machines later.")]
+        [SerializeField, Min(0f)] private float repairSpeed = 5f;
 
-        [Tooltip("Higher values mean this staff member handles cash desk tasks faster later.")]
-        [SerializeField, Min(0f)] private float cashDeskSpeed = 1f;
+        [Tooltip("Seconds required to handle cash desk tasks later.")]
+        [SerializeField, Min(0f)] private float cashDeskSpeed = 5f;
 
         [Header("Behaviour")]
         [Tooltip("How patient this staff member is before returning to idle behaviour.")]

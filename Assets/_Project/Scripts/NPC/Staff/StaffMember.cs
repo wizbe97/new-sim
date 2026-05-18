@@ -1,10 +1,12 @@
+using Project.Interfaces;
+using Project.Managers;
 using UnityEngine;
 using UnityEngine.AI;
 
 namespace Project.Staff
 {
     [DisallowMultipleComponent]
-    public sealed class StaffMember : MonoBehaviour
+    public sealed class StaffMember : MonoBehaviour, IInteractable
     {
         [Header("Runtime Data")]
         [SerializeField] private StaffMemberSO config;
@@ -17,16 +19,37 @@ namespace Project.Staff
         [SerializeField, Min(0.05f)] private float navMeshSampleRadius = 2f;
 
         private Rigidbody cachedRigidbody;
+        private StaffManager staffManager;
+        private StaffJobController jobController;
         private bool isSkyDropping;
 
         public StaffMemberSO Config => config;
         public string StaffName => config != null ? config.StaffName : name;
 
-        public float SlotCollectionSpeed => config != null ? config.SlotCollectionSpeed : 1f;
-        public float TableGameSpeed => config != null ? config.TableGameSpeed : 1f;
-        public float CleaningSpeed => config != null ? config.CleaningSpeed : 1f;
-        public float RepairSpeed => config != null ? config.RepairSpeed : 1f;
-        public float CashDeskSpeed => config != null ? config.CashDeskSpeed : 1f;
+        public bool IsSkyDropping => isSkyDropping;
+
+        public bool IsReadyForJobs =>
+            !isSkyDropping &&
+            navMeshAgent != null &&
+            navMeshAgent.enabled &&
+            navMeshAgent.isOnNavMesh;
+
+        public NavMeshAgent Agent => navMeshAgent;
+        public StaffJobController JobController => jobController;
+
+        // These now behave as task durations in seconds.
+        // Example: SlotCollectionSpeed = 5 means slot collection takes 5 seconds.
+        public float SlotCollectionSpeed => config != null ? config.SlotCollectionSpeed : 5f;
+        public float TableGameSpeed => config != null ? config.TableGameSpeed : 5f;
+        public float CleaningSpeed => config != null ? config.CleaningSpeed : 5f;
+        public float RepairSpeed => config != null ? config.RepairSpeed : 5f;
+        public float CashDeskSpeed => config != null ? config.CashDeskSpeed : 5f;
+
+        public float PatienceSeconds => config != null ? config.PatienceSeconds : 8f;
+        public float WorkSearchRadius => config != null ? config.WorkSearchRadius : 12f;
+
+        public string InteractionPrompt => $"Manage {StaffName}";
+        public bool CanInteract => IsReadyForJobs && staffManager != null && jobController != null;
 
         private void Awake()
         {
@@ -36,6 +59,7 @@ namespace Project.Staff
             }
 
             cachedRigidbody = GetComponent<Rigidbody>();
+            jobController = GetComponent<StaffJobController>();
         }
 
         private void Update()
@@ -48,14 +72,37 @@ namespace Project.Staff
             TryCompleteSkyDrop();
         }
 
-        public void Initialize(StaffMemberSO staffConfig)
+        public void Initialize(StaffMemberSO staffConfig, StaffManager owningStaffManager)
         {
             config = staffConfig;
+            staffManager = owningStaffManager;
 
             if (config != null)
             {
                 name = $"Staff_{config.StaffName}";
             }
+
+            if (navMeshAgent == null)
+            {
+                navMeshAgent = GetComponent<NavMeshAgent>();
+            }
+
+            if (jobController == null)
+            {
+                jobController = GetComponent<StaffJobController>();
+            }
+
+            cachedRigidbody = GetComponent<Rigidbody>();
+        }
+
+        public void Interact()
+        {
+            if (!CanInteract)
+            {
+                return;
+            }
+
+            staffManager.ShowJobAssignmentPanel(this);
         }
 
         public void BeginSkyDrop()
@@ -128,6 +175,8 @@ namespace Project.Staff
 
             isSkyDropping = false;
 
+            Quaternion uprightRotation = Quaternion.Euler(0f, transform.eulerAngles.y, 0f);
+
             if (cachedRigidbody != null)
             {
                 cachedRigidbody.velocity = Vector3.zero;
@@ -136,13 +185,13 @@ namespace Project.Staff
                 cachedRigidbody.isKinematic = true;
             }
 
+            transform.SetPositionAndRotation(hit.position, uprightRotation);
+
             if (navMeshAgent != null)
             {
                 navMeshAgent.enabled = true;
                 navMeshAgent.Warp(hit.position);
             }
-
-            transform.position = hit.position;
 
             Debug.Log($"{name} landed and is now ready for staff AI.", this);
         }

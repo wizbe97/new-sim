@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using Project.Player;
 using Project.Staff;
+using Project.Staff.UI;
 using UnityEngine;
 
 namespace Project.Managers
@@ -10,6 +12,10 @@ namespace Project.Managers
         [Header("Delivery Location")]
         [Tooltip("Staff will fall from the sky above this point. Assign the same transform used by the item delivery pad.")]
         [SerializeField] private Transform staffDeliveryPad;
+
+        [Header("Idle Location")]
+        [Tooltip("Where idle staff should stand. This should be assigned by the scene, not directly on the staff prefab.")]
+        [SerializeField] private Transform staffIdleStandPoint;
 
         [Header("Spawn Settings")]
         [SerializeField] private float spawnHeight = 20f;
@@ -23,7 +29,6 @@ namespace Project.Managers
         [SerializeField] private float staffMass = 3f;
         [SerializeField] private float staffDrag = 0.1f;
         [SerializeField] private float staffAngularDrag = 0.05f;
-        [SerializeField] private Vector3 randomTorqueRange = new Vector3(3f, 3f, 3f);
 
         private readonly List<StaffMember> hiredStaff = new();
         private readonly HashSet<string> hiredUniqueStaffIds = new();
@@ -31,6 +36,13 @@ namespace Project.Managers
         private PlayerBalanceManager playerBalanceManager;
         private CasinoProgressionManager casinoProgressionManager;
         private UIManager uiManager;
+        private CursorManager cursorManager;
+        private PlayerManager playerManager;
+        private SlotMachineManager slotMachineManager;
+        private CashDeskManager cashDeskManager;
+
+        private StaffJobAssignmentPanelView jobAssignmentPanelView;
+        private StaffMember activeStaffMember;
 
         public IReadOnlyList<StaffMember> HiredStaff => hiredStaff;
         public bool HasStaffDeliveryPad => staffDeliveryPad != null;
@@ -40,11 +52,19 @@ namespace Project.Managers
         public void Initialize(
             PlayerBalanceManager balanceManager,
             CasinoProgressionManager progressionManager,
-            UIManager newUIManager)
+            UIManager newUIManager,
+            CursorManager newCursorManager,
+            PlayerManager newPlayerManager,
+            SlotMachineManager newSlotMachineManager,
+            CashDeskManager newCashDeskManager)
         {
             playerBalanceManager = balanceManager;
             casinoProgressionManager = progressionManager;
             uiManager = newUIManager;
+            cursorManager = newCursorManager;
+            playerManager = newPlayerManager;
+            slotMachineManager = newSlotMachineManager;
+            cashDeskManager = newCashDeskManager;
 
             if (playerBalanceManager == null)
             {
@@ -61,6 +81,30 @@ namespace Project.Managers
             if (uiManager == null)
             {
                 Debug.LogError($"{nameof(StaffManager)} cannot initialize because UIManager is missing.", this);
+                return;
+            }
+
+            if (cursorManager == null)
+            {
+                Debug.LogError($"{nameof(StaffManager)} cannot initialize because CursorManager is missing.", this);
+                return;
+            }
+
+            if (playerManager == null)
+            {
+                Debug.LogError($"{nameof(StaffManager)} cannot initialize because PlayerManager is missing.", this);
+                return;
+            }
+
+            if (slotMachineManager == null)
+            {
+                Debug.LogError($"{nameof(StaffManager)} cannot initialize because SlotMachineManager is missing.", this);
+                return;
+            }
+
+            if (cashDeskManager == null)
+            {
+                Debug.LogError($"{nameof(StaffManager)} cannot initialize because CashDeskManager is missing.", this);
                 return;
             }
 
@@ -84,6 +128,12 @@ namespace Project.Managers
             {
                 casinoProgressionManager.LevelChanged -= HandleCasinoLevelChanged;
             }
+
+            if (jobAssignmentPanelView != null)
+            {
+                jobAssignmentPanelView.JobSelected -= HandleJobSelected;
+                jobAssignmentPanelView.CloseRequested -= HandleJobPanelCloseRequested;
+            }
         }
 
         public void InitializeDeliveryPad(Transform deliveryPadTransform)
@@ -101,6 +151,35 @@ namespace Project.Managers
         public void ClearDeliveryPad()
         {
             staffDeliveryPad = null;
+        }
+
+        public void InitializeIdleStandPoint(Transform idleStandPointTransform)
+        {
+            if (idleStandPointTransform == null)
+            {
+                Debug.LogWarning($"{nameof(StaffManager)} received no staff idle stand point. Idle staff will use their landing position as fallback.", this);
+                staffIdleStandPoint = null;
+                return;
+            }
+
+            staffIdleStandPoint = idleStandPointTransform;
+
+            for (int i = 0; i < hiredStaff.Count; i++)
+            {
+                StaffMember staffMember = hiredStaff[i];
+
+                if (staffMember == null || staffMember.JobController == null)
+                {
+                    continue;
+                }
+
+                staffMember.JobController.SetIdleStandPoint(staffIdleStandPoint);
+            }
+        }
+
+        public void ClearIdleStandPoint()
+        {
+            staffIdleStandPoint = null;
         }
 
         public bool IsStaffMemberUnlocked(StaffMemberSO staffMember)
@@ -206,6 +285,53 @@ namespace Project.Managers
             return true;
         }
 
+        public void ShowJobAssignmentPanel(StaffMember staffMember)
+        {
+            if (staffMember == null || staffMember.JobController == null)
+            {
+                return;
+            }
+
+            activeStaffMember = staffMember;
+
+            CreateJobAssignmentPanelIfNeeded();
+            jobAssignmentPanelView.Show(activeStaffMember);
+
+            SetPlayerControlEnabled(false);
+
+            if (cursorManager != null)
+            {
+                cursorManager.EnableMenuCursorMode();
+            }
+
+            if (uiManager != null)
+            {
+                uiManager.SetGameplayHUDVisible(false);
+            }
+        }
+
+        public void HideJobAssignmentPanel()
+        {
+            activeStaffMember = null;
+
+            if (jobAssignmentPanelView != null)
+            {
+                jobAssignmentPanelView.Hide();
+            }
+
+            SetPlayerControlEnabled(true);
+
+            if (cursorManager != null)
+            {
+                cursorManager.EnableGameplayCursorMode();
+            }
+
+            if (uiManager != null)
+            {
+                uiManager.SetGameplayHUDVisible(true);
+            }
+        }
+
         private void HandleStaffHireRequested(StaffMemberSO staffMember)
         {
             TryHireStaffMember(staffMember);
@@ -222,10 +348,23 @@ namespace Project.Managers
                 spawnRotation);
 
             staffInstance.name = $"Staff_{staffMember.StaffName}";
-            staffInstance.Initialize(staffMember);
 
             ConfigurePhysics(staffInstance.gameObject);
-            ApplyDeliveryGimmick(staffInstance.GetComponent<Rigidbody>());
+
+            StaffJobController jobController = staffInstance.GetComponent<StaffJobController>();
+
+            if (jobController == null)
+            {
+                jobController = staffInstance.gameObject.AddComponent<StaffJobController>();
+            }
+
+            staffInstance.Initialize(staffMember, this);
+
+            jobController.Initialize(
+                staffInstance,
+                slotMachineManager,
+                cashDeskManager,
+                staffIdleStandPoint);
 
             staffInstance.BeginSkyDrop();
 
@@ -280,21 +419,6 @@ namespace Project.Managers
             return rigidbody;
         }
 
-        private void ApplyDeliveryGimmick(Rigidbody rigidbody)
-        {
-            if (rigidbody == null)
-            {
-                return;
-            }
-
-            Vector3 randomTorque = new Vector3(
-                UnityEngine.Random.Range(-randomTorqueRange.x, randomTorqueRange.x),
-                UnityEngine.Random.Range(-randomTorqueRange.y, randomTorqueRange.y),
-                UnityEngine.Random.Range(-randomTorqueRange.z, randomTorqueRange.z));
-
-            rigidbody.AddTorque(randomTorque, ForceMode.Impulse);
-        }
-
         private void RegisterHiredStaff(StaffMember staffInstance, StaffMemberSO staffConfig)
         {
             if (staffInstance == null || staffConfig == null)
@@ -307,6 +431,53 @@ namespace Project.Managers
             if (staffConfig.IsUniqueHire && !string.IsNullOrWhiteSpace(staffConfig.StaffId))
             {
                 hiredUniqueStaffIds.Add(staffConfig.StaffId);
+            }
+        }
+
+        private void CreateJobAssignmentPanelIfNeeded()
+        {
+            if (jobAssignmentPanelView != null)
+            {
+                return;
+            }
+
+            jobAssignmentPanelView = StaffJobAssignmentPanelView.Create();
+            jobAssignmentPanelView.JobSelected += HandleJobSelected;
+            jobAssignmentPanelView.CloseRequested += HandleJobPanelCloseRequested;
+        }
+
+        private void HandleJobSelected(StaffJobCategory jobCategory)
+        {
+            if (activeStaffMember == null || activeStaffMember.JobController == null)
+            {
+                HideJobAssignmentPanel();
+                return;
+            }
+
+            activeStaffMember.JobController.AssignJob(jobCategory);
+            HideJobAssignmentPanel();
+        }
+
+        private void HandleJobPanelCloseRequested()
+        {
+            HideJobAssignmentPanel();
+        }
+
+        private void SetPlayerControlEnabled(bool enabled)
+        {
+            if (playerManager == null || playerManager.CurrentPlayer == null)
+            {
+                return;
+            }
+
+            FirstPersonController player = playerManager.CurrentPlayer;
+            player.SetCanMove(enabled);
+
+            PlayerInteractionController interactionController = player.GetComponent<PlayerInteractionController>();
+
+            if (interactionController != null)
+            {
+                interactionController.SetCanInteract(enabled);
             }
         }
 

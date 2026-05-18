@@ -680,7 +680,7 @@ MonoBehaviour:
   maxSampleAttempts: 12
   minPauseBetweenExplorationSteps: 0.25
   maxPauseBetweenExplorationSteps: 1.25
-  logIdleBehaviour: 1
+  logIdleBehaviour: 0
 --- !u!114 &6943013962875455572
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -719,8 +719,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a75013ee45209944a9f4bc611c34e129, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  logEverySpin: 1
-  logSessionSummary: 1
+  logEverySpin: 0
+  logSessionSummary: 0
 --- !u!114 &5186089325016951168
 MonoBehaviour:
   m_ObjectHideFlags: 0

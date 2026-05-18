@@ -100,6 +100,7 @@ namespace Project.Managers
             BindPlayerSceneReferences(sceneReferences);
             BindDeliverySceneReferences(sceneReferences);
             BindCashDeskSceneReferences(sceneReferences);
+            BindStaffSceneReferences(sceneReferences);
 
             if (slotMachineManager != null)
             {
@@ -146,20 +147,35 @@ namespace Project.Managers
             if (!sceneReferences.UseItemDeliveryInScene)
             {
                 itemDeliveryManager.ClearDeliveryPad();
-                staffManager.ClearDeliveryPad();
+
+                if (staffManager != null)
+                {
+                    staffManager.ClearDeliveryPad();
+                }
+
                 return;
             }
 
             if (sceneReferences.ItemDeliveryPad == null)
             {
                 Debug.LogError($"{nameof(GameManager)} cannot bind item delivery because Item Delivery Pad is missing.", sceneReferences);
+
                 itemDeliveryManager.ClearDeliveryPad();
-                staffManager.ClearDeliveryPad();
+
+                if (staffManager != null)
+                {
+                    staffManager.ClearDeliveryPad();
+                }
+
                 return;
             }
 
             itemDeliveryManager.Initialize(sceneReferences.ItemDeliveryPad);
-            staffManager.InitializeDeliveryPad(sceneReferences.ItemDeliveryPad);
+
+            if (staffManager != null)
+            {
+                staffManager.InitializeDeliveryPad(sceneReferences.ItemDeliveryPad);
+            }
         }
 
         private void BindCashDeskSceneReferences(SceneReferenceProvider sceneReferences)
@@ -183,6 +199,30 @@ namespace Project.Managers
                 sceneReferences.CashDeskQueueStartPoint,
                 sceneReferences.CashDeskTicketPlacementPoint,
                 casinoProgressionManager);
+
+            cashDeskManager.InitializeStaffServicePoint(
+                sceneReferences.CashDeskStaffServicePoint);
+        }
+
+        private void BindStaffSceneReferences(SceneReferenceProvider sceneReferences)
+        {
+            if (staffManager == null)
+            {
+                return;
+            }
+
+            if (sceneReferences.StaffIdleStandPoint == null)
+            {
+                staffManager.ClearIdleStandPoint();
+
+                Debug.LogWarning(
+                    $"{nameof(GameManager)} could not bind staff idle point because SceneReferenceProvider has no Staff Idle Stand Point assigned. Idle staff will use their landing position.",
+                    sceneReferences);
+
+                return;
+            }
+
+            staffManager.InitializeIdleStandPoint(sceneReferences.StaffIdleStandPoint);
         }
 
         private void InitializeGlobalManagers()
@@ -210,7 +250,11 @@ namespace Project.Managers
             staffManager.Initialize(
                 playerBalanceManager,
                 casinoProgressionManager,
-                uiManager);
+                uiManager,
+                cursorManager,
+                playerManager,
+                slotMachineManager,
+                cashDeskManager);
 
             shopUIController.Initialize(
                 uiManager,

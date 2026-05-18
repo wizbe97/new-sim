@@ -59,6 +59,7 @@ MonoBehaviour:
     titleOffsetMax: {x: -6, y: 44}
   items:
   - rid: 7438918939936030773
+  - rid: 7438918959244247092
   references:
     version: 2
     RefIds:
@@ -69,3 +70,10 @@ MonoBehaviour:
         isDisabled: 0
         disabledReason: Unavailable
         staffMember: {fileID: 11400000, guid: ce0968891829a414eb0d5d358f7b445d, type: 2}
+    - rid: 7438918959244247092
+      type: {class: PhoneStaffItem, ns: Project.UI.Phone, asm: Assembly-CSharp}
+      data:
+        itemId: new_item
+        isDisabled: 0
+        disabledReason: Unavailable
+        staffMember: {fileID: 11400000, guid: ddea47959d4bef04fbd491612cd7d08a, type: 2}

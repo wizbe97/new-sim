@@ -8,6 +8,7 @@ using UnityEngine;
 
 namespace Project.Managers
 {
+    [RequireComponent(typeof(SlotCashCollectionService))]
     public sealed class SlotMachineManager : MonoBehaviour
     {
         [Header("Global Slot Settings")]
@@ -18,6 +19,8 @@ namespace Project.Managers
         private PlayerBalanceManager playerBalanceManager;
         private CursorManager cursorManager;
         private CasinoProgressionManager casinoProgressionManager;
+        private SlotCashCollectionService slotCashCollectionService;
+
         private FirstPersonController player;
         private PlayerInteractionController playerInteractionController;
         private PlayerInputHandler inputHandler;
@@ -28,6 +31,7 @@ namespace Project.Managers
 
         public float SpinDurationSeconds => spinDurationSeconds;
         public bool IsCollectionPanelOpen => isCollectionPanelOpen;
+        public SlotCashCollectionService CashCollectionService => slotCashCollectionService;
 
         public void Initialize(
             FirstPersonController newPlayer,
@@ -39,6 +43,7 @@ namespace Project.Managers
             playerBalanceManager = balanceManager;
             cursorManager = newCursorManager;
             casinoProgressionManager = newCasinoProgressionManager;
+            slotCashCollectionService = GetComponent<SlotCashCollectionService>();
 
             if (player == null)
             {
@@ -63,6 +68,16 @@ namespace Project.Managers
                 Debug.LogError($"{nameof(SlotMachineManager)} cannot initialize because CasinoProgressionManager is missing.", this);
                 return;
             }
+
+            if (slotCashCollectionService == null)
+            {
+                Debug.LogError($"{nameof(SlotMachineManager)} cannot initialize because SlotCashCollectionService is missing.", this);
+                return;
+            }
+
+            slotCashCollectionService.Initialize(
+                playerBalanceManager,
+                casinoProgressionManager);
 
             playerInteractionController = player.GetComponent<PlayerInteractionController>();
             inputHandler = player.GetComponent<PlayerInputHandler>();
@@ -148,6 +163,77 @@ namespace Project.Managers
             return slotMachine != null;
         }
 
+        public bool TryGetCollectableMachine(out SlotMachine slotMachine)
+        {
+            return TryGetCollectableMachine(null, out slotMachine);
+        }
+
+        public bool TryGetCollectableMachine(
+            IReadOnlyCollection<SlotMachine> excludedMachines,
+            out SlotMachine slotMachine)
+        {
+            slotMachine = null;
+
+            int highestStoredCash = 0;
+
+            for (int i = registeredMachines.Count - 1; i >= 0; i--)
+            {
+                SlotMachine machine = registeredMachines[i];
+
+                if (machine == null)
+                {
+                    registeredMachines.RemoveAt(i);
+                    continue;
+                }
+
+                if (IsExcluded(machine, excludedMachines))
+                {
+                    continue;
+                }
+
+                if (machine.IsBeingMovedForPlacement)
+                {
+                    continue;
+                }
+
+                if (machine.StoredCashFromDeposits <= 0)
+                {
+                    continue;
+                }
+
+                if (machine.StoredCashFromDeposits <= highestStoredCash)
+                {
+                    continue;
+                }
+
+                highestStoredCash = machine.StoredCashFromDeposits;
+                slotMachine = machine;
+            }
+
+            return slotMachine != null;
+        }
+
+        public bool TryCollectSlotCash(
+            SlotMachine slotMachine,
+            int requestedAmount,
+            out int collectedAmount,
+            Object collector = null)
+        {
+            collectedAmount = 0;
+
+            if (slotCashCollectionService == null)
+            {
+                Debug.LogError($"{nameof(SlotMachineManager)} cannot collect slot cash because SlotCashCollectionService is missing.", this);
+                return false;
+            }
+
+            return slotCashCollectionService.TryCollectSlotCash(
+                slotMachine,
+                requestedAmount,
+                out collectedAmount,
+                collector);
+        }
+
         public void SetSpinDuration(float seconds)
         {
             spinDurationSeconds = Mathf.Max(0.1f, seconds);
@@ -226,6 +312,18 @@ namespace Project.Managers
             casinoProgressionManager.AddConfiguredXp(source, multiplier);
         }
 
+        public void RefreshSceneMachines()
+        {
+            registeredMachines.RemoveAll(machine => machine == null);
+
+            SlotMachine[] sceneMachines = FindObjectsByType<SlotMachine>(FindObjectsSortMode.None);
+
+            foreach (SlotMachine machine in sceneMachines)
+            {
+                Register(machine);
+            }
+        }
+
         private void CreateCollectionPanelIfNeeded()
         {
             if (collectionPanelView != null)
@@ -251,39 +349,18 @@ namespace Project.Managers
                 return;
             }
 
-            bool collected = activeCollectionSlotMachine.TryCollectStoredCash(
+            bool collected = TryCollectSlotCash(
+                activeCollectionSlotMachine,
                 requestedAmount,
-                out int collectedAmount);
+                out int collectedAmount,
+                player);
 
             if (!collected || collectedAmount <= 0)
             {
                 return;
             }
 
-            playerBalanceManager.AddBalance(collectedAmount);
-
-            AwardSlotCashCollectedXp(activeCollectionSlotMachine, collectedAmount);
-
-            Debug.Log(
-                $"Collected £{collectedAmount} from {activeCollectionSlotMachine.name} into player balance.",
-                activeCollectionSlotMachine);
-
             HideCollectionPanel();
-        }
-
-        private void AwardSlotCashCollectedXp(SlotMachine slotMachine, int collectedAmount)
-        {
-            if (casinoProgressionManager == null || slotMachine == null || collectedAmount <= 0)
-            {
-                return;
-            }
-
-            float multiplier = GetSlotMachineXpMultiplier(slotMachine);
-
-            casinoProgressionManager.AddConfiguredXp(
-                CasinoXpSource.SlotCashCollected,
-                collectedAmount,
-                multiplier);
         }
 
         private float GetSlotMachineXpMultiplier(SlotMachine slotMachine)
@@ -296,16 +373,24 @@ namespace Project.Managers
             return Mathf.Max(0f, slotMachine.Config.CasinoXpMultiplier);
         }
 
-        public void RefreshSceneMachines()
+        private bool IsExcluded(
+            SlotMachine machine,
+            IReadOnlyCollection<SlotMachine> excludedMachines)
         {
-            registeredMachines.RemoveAll(machine => machine == null);
-
-            SlotMachine[] sceneMachines = FindObjectsByType<SlotMachine>(FindObjectsSortMode.None);
-
-            foreach (SlotMachine machine in sceneMachines)
+            if (machine == null || excludedMachines == null || excludedMachines.Count == 0)
             {
-                Register(machine);
+                return false;
             }
+
+            foreach (SlotMachine excludedMachine in excludedMachines)
+            {
+                if (excludedMachine == machine)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private void HandleCloseRequested()

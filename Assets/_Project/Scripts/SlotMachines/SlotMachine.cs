@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Project.Interfaces;
 using Project.Managers;
 using Project.NPC.Customer;
@@ -15,6 +16,10 @@ namespace Project.SlotMachines
         [Header("Play Point")]
         [Tooltip("Where NPCs stand to play this slot machine.")]
         [SerializeField] private Transform playPoint;
+
+        [Header("Staff Collection Points")]
+        [Tooltip("Ordered positions staff can stand at to collect cash. Index 0 is tried first, then index 1, and so on.")]
+        [SerializeField] private List<Transform> staffCollectionPoints = new();
 
         [Header("Runtime Financials")]
         [SerializeField] private int storedCashFromDeposits;
@@ -33,6 +38,7 @@ namespace Project.SlotMachines
 
         public SlotMachineConfigSO Config => config;
         public Transform PlayPoint => playPoint;
+        public IReadOnlyList<Transform> StaffCollectionPoints => staffCollectionPoints;
 
         public bool IsReserved => reservedBy != null;
         public bool IsOccupied => activeCustomer != null;
@@ -81,6 +87,32 @@ namespace Project.SlotMachines
             {
                 manager.Unregister(this);
             }
+        }
+
+        public bool TryGetStaffCollectionPoint(int index, out Transform collectionPoint)
+        {
+            collectionPoint = null;
+
+            if (index < 0 || index >= staffCollectionPoints.Count)
+            {
+                return false;
+            }
+
+            collectionPoint = staffCollectionPoints[index];
+            return collectionPoint != null;
+        }
+
+        public bool HasAnyStaffCollectionPoint()
+        {
+            for (int i = 0; i < staffCollectionPoints.Count; i++)
+            {
+                if (staffCollectionPoints[i] != null)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public bool TryReserve(CustomerController customer)
@@ -334,5 +366,18 @@ namespace Project.SlotMachines
             playPoint.localPosition = new Vector3(0f, 0f, -1.25f);
             playPoint.localRotation = Quaternion.identity;
         }
+
+#if UNITY_EDITOR
+        private void OnValidate()
+        {
+            for (int i = staffCollectionPoints.Count - 1; i >= 0; i--)
+            {
+                if (staffCollectionPoints[i] == null)
+                {
+                    staffCollectionPoints.RemoveAt(i);
+                }
+            }
+        }
+#endif
     }
 }

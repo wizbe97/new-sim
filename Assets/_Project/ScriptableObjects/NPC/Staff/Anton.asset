@@ -10,21 +10,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 51dd7d7da05882a458cf6855966f269e, type: 3}
-  m_Name: StaffMember
+  m_Name: Anton
   m_EditorClassIdentifier: 
-  staffId: new_staff_member
-  staffName: Charlie
-  description: Stinky useless neek
-  icon: {fileID: 10915, guid: 0000000000000000f000000000000000, type: 0}
-  prefab: {fileID: -7430822906114423774, guid: 76b463b147940a440aab8799f797e75d, type: 3}
-  unlockCost: 250
+  staffId: 1
+  staffName: Anton
+  description: Staff member description.
+  icon: {fileID: 10901, guid: 0000000000000000f000000000000000, type: 0}
+  prefab: {fileID: -7430822906114423774, guid: f580d43c70b225c43a8a57f7ff0d0d63, type: 3}
+  unlockCost: 100
   requiredCasinoLevel: 1
   isUniqueHire: 1
   dailySalary: 50
-  slotCollectionSpeed: 1
-  tableGameSpeed: 1
-  cleaningSpeed: 1
-  repairSpeed: 1
-  cashDeskSpeed: 1
+  slotCollectionSpeed: 5
+  tableGameSpeed: 5
+  cleaningSpeed: 5
+  repairSpeed: 5
+  cashDeskSpeed: 5
   patienceSeconds: 8
   workSearchRadius: 12

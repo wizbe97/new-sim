@@ -13,6 +13,7 @@ namespace Project.CashDesk
         [SerializeField] private int amount;
         [SerializeField] private bool isPlacedOnDesk;
         [SerializeField] private bool isPaid;
+        [SerializeField] private float placedOnDeskTime = -1f;
 
         [Header("Visual")]
         [SerializeField] private Transform ticketVisual;
@@ -43,6 +44,7 @@ namespace Project.CashDesk
         public CustomerController Owner => owner;
         public bool IsPlacedOnDesk => isPlacedOnDesk;
         public bool IsPaid => isPaid;
+        public float PlacedOnDeskTime => placedOnDeskTime;
 
         public string InteractionPrompt => $"Pay ticket: £{amount}";
 
@@ -90,6 +92,9 @@ namespace Project.CashDesk
         {
             amount = Mathf.Max(0, ticketAmount);
             owner = ticketOwner;
+            isPlacedOnDesk = false;
+            isPaid = false;
+            placedOnDeskTime = -1f;
 
             CacheCollider();
             CreateVisualIfMissing();
@@ -112,6 +117,7 @@ namespace Project.CashDesk
             }
 
             isPlacedOnDesk = false;
+            placedOnDeskTime = -1f;
 
             transform.SetParent(handPoint, false);
             transform.localPosition = Vector3.zero;
@@ -130,6 +136,7 @@ namespace Project.CashDesk
             }
 
             isPlacedOnDesk = true;
+            placedOnDeskTime = Time.time;
 
             transform.SetParent(deskPoint, false);
             transform.localPosition = Vector3.zero;
@@ -140,7 +147,7 @@ namespace Project.CashDesk
             RefreshValueText();
 
             Debug.Log(
-                $"{name} placed on desk. CanInteract: {CanInteract}, Amount: £{amount}.",
+                $"{name} placed on desk at {placedOnDeskTime:0.00}. CanInteract: {CanInteract}, Amount: £{amount}.",
                 this);
         }
 

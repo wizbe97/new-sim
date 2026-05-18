@@ -17,7 +17,7 @@ GameObject:
   - component: {fileID: -7430822906114423774}
   - component: {fileID: -1124816676339310274}
   m_Layer: 0
-  m_Name: Charlie
+  m_Name: Anton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -68,7 +68,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 3e2eaa3ef135eef4f86ae6e7eef8d365, type: 2}
+  - {fileID: 2100000, guid: 7f5b39d3bb91e00479495f36f2b87c6a, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -174,7 +174,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 38370bfaaa4898c4d941c003d6e361dd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  config: {fileID: 11400000, guid: ce0968891829a414eb0d5d358f7b445d, type: 2}
+  config: {fileID: 11400000, guid: ddea47959d4bef04fbd491612cd7d08a, type: 2}
   navMeshAgent: {fileID: 0}
   landingVelocityThreshold: 0.15
   navMeshSampleRadius: 2
@@ -192,13 +192,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   currentJob:
     category: 0
-    slotCollectionIntervalSeconds: 8
+    slotCollectionSearchIntervalSeconds: 4
     collectAllSlotCash: 1
     slotCollectionAmount: 100
     cashDeskPayoutIntervalSeconds: 5
   idleStandPoint: {fileID: 0}
   destinationReachedDistance: 0.7
   navMeshSampleRadius: 2
-  wanderWhileWaiting: 1
-  wanderRadius: 8
-  wanderIntervalSeconds: 4
+  collectionPointReachedDistance: 0.75
+  wanderWhenNoSlotCollectionWork: 1
+  noWorkWanderRadius: 8
+  noWorkWanderIntervalSeconds: 4

@@ -8,6 +8,7 @@ using UnityEngine.AI;
 
 namespace Project.Managers
 {
+    [RequireComponent(typeof(CashDeskPayoutService))]
     public sealed class CashDeskManager : MonoBehaviour
     {
         private sealed class QueueEntry
@@ -44,16 +45,23 @@ namespace Project.Managers
         [Header("Ticket Placement")]
         [SerializeField] private Transform ticketPlacementPoint;
 
+        [Header("Staff Service Point")]
+        [Tooltip("Where staff stand while working the cash desk. This is assigned from SceneReferenceProvider.")]
+        [SerializeField] private Transform staffServicePoint;
+
         [Header("Economy")]
         [SerializeField] private PlayerBalanceManager playerBalanceManager;
 
         private CasinoProgressionManager casinoProgressionManager;
+        private CashDeskPayoutService cashDeskPayoutService;
 
         private readonly List<QueueEntry> queue = new();
         private Coroutine delayedQueueUpdateRoutine;
 
         public int QueueCount => queue.Count;
         public bool HasSceneBindings => queueStartPoint != null && ticketPlacementPoint != null;
+        public bool HasFrontTicket => TryGetFrontTicket(out _);
+        public CashDeskPayoutService PayoutService => cashDeskPayoutService;
 
         public void Initialize(
             PlayerBalanceManager balanceManager,
@@ -65,6 +73,7 @@ namespace Project.Managers
             queueStartPoint = newQueueStartPoint;
             ticketPlacementPoint = newTicketPlacementPoint;
             casinoProgressionManager = newCasinoProgressionManager;
+            cashDeskPayoutService = GetComponent<CashDeskPayoutService>();
 
             if (queueFacingTarget == null)
             {
@@ -95,7 +104,29 @@ namespace Project.Managers
                 return;
             }
 
+            if (cashDeskPayoutService == null)
+            {
+                Debug.LogError($"{nameof(CashDeskManager)} cannot initialize because CashDeskPayoutService is missing.", this);
+                return;
+            }
+
+            cashDeskPayoutService.Initialize(
+                playerBalanceManager,
+                casinoProgressionManager);
+
             Debug.Log($"{nameof(CashDeskManager)} initialized.", this);
+        }
+
+        public void InitializeStaffServicePoint(Transform newStaffServicePoint)
+        {
+            staffServicePoint = newStaffServicePoint;
+
+            if (staffServicePoint == null)
+            {
+                Debug.LogWarning(
+                    $"{nameof(CashDeskManager)} has no Staff Service Point assigned. Cash-desk staff will fall back to the Ticket Placement Point.",
+                    this);
+            }
         }
 
         public void ClearSceneBindings()
@@ -111,6 +142,7 @@ namespace Project.Managers
             queueStartPoint = null;
             queueFacingTarget = null;
             ticketPlacementPoint = null;
+            staffServicePoint = null;
         }
 
         public void QueueCustomer(CustomerController customer, CashOutTicket ticket)
@@ -156,7 +188,37 @@ namespace Project.Managers
             return queue.Count > 0 && queue[0].Ticket == ticket;
         }
 
+        public bool TryGetFrontTicket(out CashOutTicket ticket)
+        {
+            ticket = null;
+
+            RemoveInvalidQueueEntries(updateLayoutIfChanged: false);
+
+            if (queue.Count <= 0)
+            {
+                return false;
+            }
+
+            ticket = queue[0].Ticket;
+            return ticket != null;
+        }
+
+        public bool TryPayFrontTicket(Object payer = null)
+        {
+            if (!TryGetFrontTicket(out CashOutTicket frontTicket))
+            {
+                return false;
+            }
+
+            return TryPayTicket(frontTicket, payer);
+        }
+
         public bool TryPayTicket(CashOutTicket ticket)
+        {
+            return TryPayTicket(ticket, this);
+        }
+
+        public bool TryPayTicket(CashOutTicket ticket, Object payer)
         {
             RemoveInvalidQueueEntries(updateLayoutIfChanged: false);
 
@@ -173,58 +235,55 @@ namespace Project.Managers
                 return false;
             }
 
-            if (playerBalanceManager == null)
+            if (cashDeskPayoutService == null)
             {
-                Debug.LogError($"{nameof(CashDeskManager)} cannot pay ticket because PlayerBalanceManager is missing.", this);
+                Debug.LogError($"{nameof(CashDeskManager)} cannot pay ticket because CashDeskPayoutService is missing.", this);
                 return false;
             }
 
-            if (!playerBalanceManager.CanAffordCashOut(ticket.Amount))
-            {
-                Debug.LogWarning(
-                    $"Cannot pay £{ticket.Amount} ticket. " +
-                    $"Casino Funds: £{playerBalanceManager.CurrentCasinoFunds}, Reserve Fund: £{playerBalanceManager.CurrentReserveFund}.",
-                    this);
+            bool paid = cashDeskPayoutService.TryPayCustomerTicket(
+                ticket,
+                paidEntry.Customer,
+                out int paidAmount,
+                payer != null ? payer : this);
 
-                return false;
-            }
-
-            int paidAmount = ticket.Amount;
-
-            bool paid = playerBalanceManager.TryPayCashOut(paidAmount);
-
-            if (!paid)
+            if (!paid || paidAmount <= 0)
             {
                 return false;
             }
-
-            ticket.MarkPaid();
 
             queue.RemoveAt(0);
-
-            paidEntry.Customer.ReceiveCashOutPayment(paidAmount);
-
-            AwardCustomerCashedOutXp(paidAmount);
-
-            Debug.Log($"{paidEntry.Customer.name} was paid £{paidAmount} at the cash desk.", this);
-
-            Destroy(ticket.gameObject);
 
             DelayRemainingQueueAdvance();
 
             return true;
         }
 
-        private void AwardCustomerCashedOutXp(int paidAmount)
+        public bool TryGetStaffServicePosition(out Vector3 servicePosition, out Vector3 facingPosition)
         {
-            if (casinoProgressionManager == null || paidAmount <= 0)
+            servicePosition = transform.position;
+            facingPosition = transform.position + transform.forward;
+
+            if (!HasSceneBindings)
             {
-                return;
+                return false;
             }
 
-            casinoProgressionManager.AddConfiguredXp(
-                CasinoXpSource.CustomerCashedOut,
-                paidAmount);
+            if (staffServicePoint != null)
+            {
+                servicePosition = staffServicePoint.position;
+                facingPosition = GetQueueFacingPosition();
+                return true;
+            }
+
+            if (ticketPlacementPoint != null)
+            {
+                servicePosition = ticketPlacementPoint.position;
+                facingPosition = GetQueueFacingPosition();
+                return true;
+            }
+
+            return false;
         }
 
         private bool IsCustomerAlreadyQueued(CustomerController customer)

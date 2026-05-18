@@ -20,5 +20,5 @@ MonoBehaviour:
   placeablePrefab: {fileID: 0}
   deliveryBoxPrefab: {fileID: 0}
   price: 50
-  isUniqueItem: 0
-  requiredCasinoLevel: 2
+  isUniqueItem: 1
+  requiredCasinoLevel: 1
