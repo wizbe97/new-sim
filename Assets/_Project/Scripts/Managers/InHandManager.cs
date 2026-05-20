@@ -1,46 +1,43 @@
 using Project.Input;
-using Project.Managers;
 using Project.Placement;
 using Project.Player;
-using Project.Progression;
+using Project.Managers;
 using Project.Shop;
-using Project.SlotMachines;
 using UnityEngine;
 
 namespace Project.Hands
 {
+    [DisallowMultipleComponent]
+    [RequireComponent(typeof(HeldBoxController))]
+    [RequireComponent(typeof(HeldFurnitureController))]
     public sealed class InHandManager : MonoBehaviour
     {
-        [Header("Box Hold Transform")]
-        [SerializeField] private Vector3 heldBoxLocalPosition = new Vector3(0f, -0.35f, 1f);
-        [SerializeField] private Vector3 heldBoxLocalEulerAngles = Vector3.zero;
-
-        [Header("Box Unpacking")]
-        [SerializeField] private float unpackForwardOffset = 1.25f;
-        [SerializeField] private float unpackUpOffset = -0.25f;
-        [SerializeField] private bool beginPlacementWhenBoxOpened = true;
-
-        [Header("Boxing Furniture")]
-        [SerializeField] private bool holdBoxAfterPackingFurniture = true;
-
         private FirstPersonController player;
         private PlayerInputHandler input;
         private BuildingManager buildingManager;
         private CasinoProgressionManager casinoProgressionManager;
 
-        private Transform heldBoxPoint;
-        private DeliveryBox heldBox;
-        private CarryablePhysics heldBoxPhysics;
-        private Vector3 heldBoxOriginalLocalScale = Vector3.one;
+        private HeldBoxController heldBoxController;
+        private HeldFurnitureController heldFurnitureController;
 
         private InHandItemType currentItemType = InHandItemType.None;
         private int handStateStartedFrame = -1;
 
         public InHandItemType CurrentItemType => currentItemType;
         public bool IsHoldingSomething => currentItemType != InHandItemType.None;
-        public bool IsHoldingBox => currentItemType == InHandItemType.DeliveryBox && heldBox != null;
-        public bool IsHoldingFurniture => currentItemType == InHandItemType.Furniture && buildingManager != null && buildingManager.IsBuilding;
-        public DeliveryBox HeldBox => heldBox;
+
+        public bool IsHoldingBox =>
+            currentItemType == InHandItemType.DeliveryBox &&
+            heldBoxController != null &&
+            heldBoxController.IsHoldingBox;
+
+        public bool IsHoldingFurniture =>
+            currentItemType == InHandItemType.Furniture &&
+            heldFurnitureController != null &&
+            heldFurnitureController.IsHoldingFurniture;
+
+        public DeliveryBox HeldBox =>
+            heldBoxController != null ? heldBoxController.HeldBox : null;
 
         public void Initialize(
             FirstPersonController newPlayer,
@@ -77,7 +74,14 @@ namespace Project.Hands
                 return;
             }
 
-            CreateHeldBoxPoint();
+            CacheControllers();
+
+            heldBoxController.Initialize(player);
+            heldFurnitureController.Initialize(
+                player,
+                buildingManager,
+                casinoProgressionManager);
+
             SubscribeToInput();
         }
 
@@ -88,14 +92,12 @@ namespace Project.Hands
 
         private void LateUpdate()
         {
-            ApplyHeldBoxPointTransform();
-
-            if (!IsHoldingBox)
+            if (heldBoxController == null)
             {
                 return;
             }
 
-            SnapHeldBoxToHoldPoint();
+            heldBoxController.TickLate();
         }
 
         public bool TryPickupBox(DeliveryBox deliveryBox)
@@ -112,36 +114,20 @@ namespace Project.Hands
                 return false;
             }
 
-            if (!deliveryBox.CanCarry)
+            if (heldBoxController == null)
             {
-                Debug.LogWarning($"{deliveryBox.name} cannot be carried.", deliveryBox);
+                Debug.LogError($"{nameof(InHandManager)} cannot pick up box because HeldBoxController is missing.", this);
                 return false;
             }
 
-            if (heldBoxPoint == null)
+            bool pickedUp = heldBoxController.TryPickupBox(deliveryBox);
+
+            if (!pickedUp)
             {
-                Debug.LogError($"{nameof(InHandManager)} cannot pick up box because Held Box Point is missing.", this);
                 return false;
-            }
-
-            heldBox = deliveryBox;
-            heldBoxOriginalLocalScale = heldBox.transform.localScale;
-
-            heldBoxPhysics = heldBox.GetComponent<CarryablePhysics>();
-
-            if (heldBoxPhysics == null)
-            {
-                heldBoxPhysics = heldBox.gameObject.AddComponent<CarryablePhysics>();
             }
 
             SetHandState(InHandItemType.DeliveryBox);
-
-            heldBoxPhysics.DisableForCarry();
-
-            heldBox.transform.SetParent(heldBoxPoint, false);
-            SnapHeldBoxToHoldPoint();
-
-            Debug.Log($"Picked up {heldBox.name}.", heldBox);
             return true;
         }
 
@@ -159,24 +145,20 @@ namespace Project.Hands
                 return false;
             }
 
-            if (buildingManager == null)
+            if (heldFurnitureController == null)
             {
-                Debug.LogError($"{nameof(InHandManager)} cannot pick up furniture because BuildingManager is missing.", this);
+                Debug.LogError($"{nameof(InHandManager)} cannot pick up furniture because HeldFurnitureController is missing.", this);
                 return false;
             }
 
-            bool started = buildingManager.BeginBuilding(furniture);
+            bool pickedUp = heldFurnitureController.TryPickupFurniture(furniture);
 
-            if (!started)
+            if (!pickedUp)
             {
                 return false;
             }
-
-            NotifySlotMachinesPickedUpForPlacement(furniture);
 
             SetHandState(InHandItemType.Furniture);
-
-            Debug.Log($"Picked up furniture for placement: {furniture.name}.", furniture);
             return true;
         }
 
@@ -187,20 +169,7 @@ namespace Project.Hands
                 return;
             }
 
-            DeliveryBox boxToDrop = heldBox;
-            CarryablePhysics boxPhysics = heldBoxPhysics;
-
-            boxToDrop.transform.SetParent(null, true);
-
-            if (boxPhysics != null)
-            {
-                boxPhysics.RestoreAfterCarry();
-                boxPhysics.EnableDroppedPhysics();
-            }
-
-            Debug.Log($"Dropped {boxToDrop.name}.", boxToDrop);
-
-            ClearBoxState();
+            heldBoxController.DropHeldBox();
             ClearHandState();
         }
 
@@ -211,35 +180,28 @@ namespace Project.Hands
                 return;
             }
 
-            DeliveryBox boxToOpen = heldBox;
+            GameObject unpackedObject = heldBoxController.OpenHeldBox();
 
-            if (!boxToOpen.CanOpen)
+            if (unpackedObject == null)
             {
-                Debug.LogWarning($"{boxToOpen.name} cannot be opened.", boxToOpen);
                 return;
             }
 
-            Vector3 spawnPosition = GetUnpackedItemSpawnPosition();
-            Quaternion spawnRotation = GetUnpackedItemSpawnRotation();
-
-            GameObject unpackedObject = boxToOpen.OpenBox(spawnPosition, spawnRotation);
-
-            ClearBoxState();
             ClearHandState();
 
-            if (unpackedObject == null || !beginPlacementWhenBoxOpened)
+            if (!heldBoxController.BeginPlacementWhenBoxOpened)
             {
                 return;
             }
 
-            FurnitureItem furnitureItem = unpackedObject.GetComponentInChildren<FurnitureItem>(true);
+            FurnitureItem furnitureItem =
+                unpackedObject.GetComponentInChildren<FurnitureItem>(true);
 
             if (furnitureItem == null)
             {
                 Debug.LogWarning(
                     $"{unpackedObject.name} was unpacked, but it does not have a {nameof(FurnitureItem)} component.",
-                    unpackedObject
-                );
+                    unpackedObject);
 
                 return;
             }
@@ -254,17 +216,12 @@ namespace Project.Hands
                 return;
             }
 
-            FurnitureItem furniture = buildingManager.CurrentFurniture;
-
-            bool placed = buildingManager.TryPlaceCurrentFurniture();
+            bool placed = heldFurnitureController.TryPlaceHeldFurniture();
 
             if (!placed)
             {
                 return;
             }
-
-            NotifySlotMachinesPlacedAfterPlacement(furniture);
-            AwardPlacementXpIfNeeded(furniture);
 
             ClearHandState();
         }
@@ -276,12 +233,7 @@ namespace Project.Hands
                 return;
             }
 
-            FurnitureItem furniture = buildingManager.CurrentFurniture;
-
-            buildingManager.CancelCurrentFurniture();
-
-            NotifySlotMachinesPlacedAfterPlacement(furniture);
-
+            heldFurnitureController.CancelHeldFurniture();
             ClearHandState();
         }
 
@@ -292,7 +244,7 @@ namespace Project.Hands
                 return;
             }
 
-            buildingManager.RotateCurrentFurniture();
+            heldFurnitureController.RotateHeldFurniture();
         }
 
         public void PackHeldFurnitureIntoBox()
@@ -302,70 +254,37 @@ namespace Project.Hands
                 return;
             }
 
-            FurnitureItem furniture = buildingManager.CurrentFurniture;
+            bool packed = heldFurnitureController.TryPackHeldFurnitureIntoBox(
+                out DeliveryBox newBox,
+                out bool shouldHoldBoxAfterPacking);
 
-            if (furniture == null)
+            if (!packed)
             {
                 return;
             }
-
-            StoreItemSO storeItem = GetStoreItemForFurniture(furniture);
-
-            if (storeItem == null)
-            {
-                Debug.LogWarning(
-                    $"{furniture.name} cannot be boxed because it has no StoreItemSO assigned.",
-                    furniture
-                );
-
-                return;
-            }
-
-            if (storeItem.DeliveryBoxPrefab == null)
-            {
-                Debug.LogWarning(
-                    $"{storeItem.ItemName} cannot be boxed because it has no Delivery Box Prefab assigned.",
-                    storeItem
-                );
-
-                return;
-            }
-
-            FurnitureItem boxedFurniture = buildingManager.TakeCurrentFurnitureForBoxing();
-
-            if (boxedFurniture == null)
-            {
-                return;
-            }
-
-            Vector3 boxSpawnPosition = boxedFurniture.transform.position;
-            Quaternion boxSpawnRotation = Quaternion.Euler(0f, player.transform.eulerAngles.y, 0f);
-
-            DeliveryBox newBox = Instantiate(
-                storeItem.DeliveryBoxPrefab,
-                boxSpawnPosition,
-                boxSpawnRotation
-            );
-
-            newBox.Initialize(storeItem);
-
-            if (newBox.GetComponent<CarryablePhysics>() == null)
-            {
-                newBox.gameObject.AddComponent<CarryablePhysics>();
-            }
-
-            Destroy(boxedFurniture.gameObject);
 
             ClearHandState();
 
-            Debug.Log(
-                $"Packed {storeItem.ItemName} into box prefab '{storeItem.DeliveryBoxPrefab.name}'.",
-                newBox
-            );
-
-            if (holdBoxAfterPackingFurniture)
+            if (shouldHoldBoxAfterPacking && newBox != null)
             {
                 TryPickupBox(newBox);
+            }
+        }
+
+        private void CacheControllers()
+        {
+            heldBoxController = GetComponent<HeldBoxController>();
+
+            if (heldBoxController == null)
+            {
+                heldBoxController = gameObject.AddComponent<HeldBoxController>();
+            }
+
+            heldFurnitureController = GetComponent<HeldFurnitureController>();
+
+            if (heldFurnitureController == null)
+            {
+                heldFurnitureController = gameObject.AddComponent<HeldFurnitureController>();
             }
         }
 
@@ -455,124 +374,6 @@ namespace Project.Hands
         {
             currentItemType = InHandItemType.None;
             handStateStartedFrame = -1;
-        }
-
-        private void CreateHeldBoxPoint()
-        {
-            if (player == null || player.CameraTarget == null)
-            {
-                Debug.LogError($"{nameof(InHandManager)} cannot create Held Box Point because player Camera Target is missing.", this);
-                return;
-            }
-
-            GameObject holdPointObject = new GameObject("HeldBoxPoint");
-            heldBoxPoint = holdPointObject.transform;
-            heldBoxPoint.SetParent(player.CameraTarget, false);
-
-            ApplyHeldBoxPointTransform();
-        }
-
-        private void ApplyHeldBoxPointTransform()
-        {
-            if (heldBoxPoint == null)
-            {
-                return;
-            }
-
-            heldBoxPoint.localPosition = heldBoxLocalPosition;
-            heldBoxPoint.localRotation = Quaternion.Euler(heldBoxLocalEulerAngles);
-            heldBoxPoint.localScale = Vector3.one;
-        }
-
-        private void SnapHeldBoxToHoldPoint()
-        {
-            if (heldBox == null)
-            {
-                return;
-            }
-
-            heldBox.transform.localPosition = Vector3.zero;
-            heldBox.transform.localRotation = Quaternion.identity;
-            heldBox.transform.localScale = heldBoxOriginalLocalScale;
-        }
-
-        private Vector3 GetUnpackedItemSpawnPosition()
-        {
-            if (player == null || player.CameraTarget == null)
-            {
-                return heldBox != null ? heldBox.transform.position : transform.position;
-            }
-
-            return player.CameraTarget.position +
-                   player.CameraTarget.forward * unpackForwardOffset +
-                   Vector3.up * unpackUpOffset;
-        }
-
-        private Quaternion GetUnpackedItemSpawnRotation()
-        {
-            if (player == null)
-            {
-                return Quaternion.identity;
-            }
-
-            return Quaternion.Euler(0f, player.transform.eulerAngles.y, 0f);
-        }
-
-        private void ClearBoxState()
-        {
-            heldBox = null;
-            heldBoxPhysics = null;
-            heldBoxOriginalLocalScale = Vector3.one;
-        }
-
-        private StoreItemSO GetStoreItemForFurniture(FurnitureItem furniture)
-        {
-            return furniture != null ? furniture.StoreItem : null;
-        }
-
-        private void AwardPlacementXpIfNeeded(FurnitureItem furniture)
-        {
-            if (furniture == null || casinoProgressionManager == null)
-            {
-                return;
-            }
-
-            if (!furniture.TryMarkPlacementXpAwarded())
-            {
-                return;
-            }
-
-            casinoProgressionManager.AddConfiguredXp(CasinoXpSource.ItemPlaced);
-        }
-
-        private void NotifySlotMachinesPickedUpForPlacement(FurnitureItem furniture)
-        {
-            if (furniture == null)
-            {
-                return;
-            }
-
-            SlotMachine[] slotMachines = furniture.GetComponentsInChildren<SlotMachine>(true);
-
-            for (int i = 0; i < slotMachines.Length; i++)
-            {
-                slotMachines[i].HandlePickedUpForPlacement();
-            }
-        }
-
-        private void NotifySlotMachinesPlacedAfterPlacement(FurnitureItem furniture)
-        {
-            if (furniture == null)
-            {
-                return;
-            }
-
-            SlotMachine[] slotMachines = furniture.GetComponentsInChildren<SlotMachine>(true);
-
-            for (int i = 0; i < slotMachines.Length; i++)
-            {
-                slotMachines[i].HandlePlacedAfterPlacement();
-            }
         }
     }
 }
