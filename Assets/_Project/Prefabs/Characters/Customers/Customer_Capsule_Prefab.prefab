@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 230786077517564393}
   - component: {fileID: 1777207761095721659}
   - component: {fileID: 3941888855503150261}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: BalanceCanvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -150,7 +150,7 @@ GameObject:
   - component: {fileID: 6177649551582429737}
   - component: {fileID: 5312842696504872480}
   - component: {fileID: 2763626447558671412}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: PaymentPopupText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -286,7 +286,7 @@ GameObject:
   - component: {fileID: 2558100304147666628}
   - component: {fileID: 2626944257030628182}
   - component: {fileID: 1668409982540917340}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Goggles
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -371,7 +371,7 @@ GameObject:
   - component: {fileID: 904989211218102676}
   - component: {fileID: 4698278002211107740}
   - component: {fileID: 2629797927206485434}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: BalanceText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -515,7 +515,7 @@ GameObject:
   - component: {fileID: 3397895796597717304}
   - component: {fileID: 787100788147038600}
   - component: {fileID: 5186089325016951168}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Customer_Capsule_Prefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}

@@ -21,10 +21,23 @@ MonoBehaviour:
   requiredCasinoLevel: 1
   isUniqueHire: 1
   dailySalary: 50
+  movementSpeed: 3.5
+  acceleration: 8
+  angularSpeed: 120
+  stoppingDistance: 0.1
+  autoBraking: 1
+  obstacleAvoidanceType: 4
+  avoidancePriority: 50
   slotCollectionSpeed: 5
   tableGameSpeed: 1
   cleaningSpeed: 1
   repairSpeed: 1
   cashDeskSpeed: 5
+  slotCollectionSearchIntervalSeconds: 4
+  collectAllSlotCash: 1
+  slotCollectionAmount: 100
+  wanderWhenNoSlotCollectionWork: 1
+  noWorkWanderRadius: 8
+  noWorkWanderIntervalSeconds: 4
   patienceSeconds: 8
   workSearchRadius: 12

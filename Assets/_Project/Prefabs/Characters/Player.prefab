@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 5482446731720104447}
   - component: {fileID: 1940124508084014401}
   - component: {fileID: 8867786727167223478}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -117,7 +117,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6302031185237760723}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: CameraTarget
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -150,7 +150,7 @@ GameObject:
   - component: {fileID: 2010953901664528178}
   - component: {fileID: 1882765796380864163}
   - component: {fileID: 7027639989418825123}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: PlayerCapsuleVisual
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -197,6 +197,8 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RayTracingMode: 2
   m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -231,7 +233,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7159345797533777482}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Visuals
   m_TagString: Untagged
   m_Icon: {fileID: 0}

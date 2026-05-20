@@ -37,13 +37,38 @@ namespace Project.Staff
         public NavMeshAgent Agent => navMeshAgent;
         public StaffJobController JobController => jobController;
 
-        // These now behave as task durations in seconds.
-        // Example: SlotCollectionSpeed = 5 means slot collection takes 5 seconds.
+        public float MovementSpeed => config != null ? config.MovementSpeed : 3.5f;
+        public float Acceleration => config != null ? config.Acceleration : 8f;
+        public float AngularSpeed => config != null ? config.AngularSpeed : 120f;
+        public float StoppingDistance => config != null ? config.StoppingDistance : 0.1f;
+        public bool AutoBraking => config == null || config.AutoBraking;
+        public ObstacleAvoidanceType ObstacleAvoidanceType =>
+            config != null ? config.ObstacleAvoidanceType : ObstacleAvoidanceType.HighQualityObstacleAvoidance;
+        public int AvoidancePriority => config != null ? config.AvoidancePriority : 50;
+
         public float SlotCollectionSpeed => config != null ? config.SlotCollectionSpeed : 5f;
         public float TableGameSpeed => config != null ? config.TableGameSpeed : 5f;
         public float CleaningSpeed => config != null ? config.CleaningSpeed : 5f;
         public float RepairSpeed => config != null ? config.RepairSpeed : 5f;
         public float CashDeskSpeed => config != null ? config.CashDeskSpeed : 5f;
+
+        public float SlotCollectionSearchIntervalSeconds =>
+            config != null ? config.SlotCollectionSearchIntervalSeconds : 4f;
+
+        public bool CollectAllSlotCash =>
+            config == null || config.CollectAllSlotCash;
+
+        public int SlotCollectionAmount =>
+            config != null ? config.SlotCollectionAmount : 100;
+
+        public bool WanderWhenNoSlotCollectionWork =>
+            config == null || config.WanderWhenNoSlotCollectionWork;
+
+        public float NoWorkWanderRadius =>
+            config != null ? config.NoWorkWanderRadius : 8f;
+
+        public float NoWorkWanderIntervalSeconds =>
+            config != null ? config.NoWorkWanderIntervalSeconds : 4f;
 
         public float PatienceSeconds => config != null ? config.PatienceSeconds : 8f;
         public float WorkSearchRadius => config != null ? config.WorkSearchRadius : 12f;
@@ -93,6 +118,34 @@ namespace Project.Staff
             }
 
             cachedRigidbody = GetComponent<Rigidbody>();
+
+            ApplyMovementSettingsToAgent();
+        }
+
+        public int GetSlotCollectionRequestAmount(int availableAmount)
+        {
+            if (config != null)
+            {
+                return config.GetSlotCollectionRequestAmount(availableAmount);
+            }
+
+            return Mathf.Max(0, availableAmount);
+        }
+
+        public void ApplyMovementSettingsToAgent()
+        {
+            if (navMeshAgent == null)
+            {
+                return;
+            }
+
+            navMeshAgent.speed = MovementSpeed;
+            navMeshAgent.acceleration = Acceleration;
+            navMeshAgent.angularSpeed = AngularSpeed;
+            navMeshAgent.stoppingDistance = StoppingDistance;
+            navMeshAgent.autoBraking = AutoBraking;
+            navMeshAgent.obstacleAvoidanceType = ObstacleAvoidanceType;
+            navMeshAgent.avoidancePriority = AvoidancePriority;
         }
 
         public void Interact()
@@ -136,6 +189,8 @@ namespace Project.Staff
             {
                 navMeshAgent.enabled = true;
             }
+
+            ApplyMovementSettingsToAgent();
 
             if (navMeshAgent.isOnNavMesh)
             {
@@ -190,6 +245,7 @@ namespace Project.Staff
             if (navMeshAgent != null)
             {
                 navMeshAgent.enabled = true;
+                ApplyMovementSettingsToAgent();
                 navMeshAgent.Warp(hit.position);
             }
 

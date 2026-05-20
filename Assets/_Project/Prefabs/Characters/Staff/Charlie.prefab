@@ -16,7 +16,8 @@ GameObject:
   - component: {fileID: -6080501745052571801}
   - component: {fileID: -7430822906114423774}
   - component: {fileID: -1124816676339310274}
-  m_Layer: 0
+  - component: {fileID: 2027368533724733571}
+  m_Layer: 7
   m_Name: Charlie
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -190,15 +191,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 234d45635006aad41b99271522fc265f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  currentJob:
-    category: 0
-    slotCollectionIntervalSeconds: 8
-    collectAllSlotCash: 1
-    slotCollectionAmount: 100
-    cashDeskPayoutIntervalSeconds: 5
   idleStandPoint: {fileID: 0}
   destinationReachedDistance: 0.7
   navMeshSampleRadius: 2
-  wanderWhileWaiting: 1
-  wanderRadius: 8
-  wanderIntervalSeconds: 4
+  collectionPointReachedDistance: 0.75
+--- !u!114 &2027368533724733571
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1757331988850174692}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b6a01b5fe4aa9c94981a8f76afe8db06, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
