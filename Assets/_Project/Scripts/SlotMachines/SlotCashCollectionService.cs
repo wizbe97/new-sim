@@ -1,3 +1,4 @@
+using Project.Economy;
 using Project.Progression;
 using Project.SlotMachines;
 using UnityEngine;
@@ -41,13 +42,51 @@ namespace Project.Managers
 
             if (slotMachine == null)
             {
-                Debug.LogWarning($"{nameof(SlotCashCollectionService)} cannot collect because SlotMachine is missing.", collector);
+                Debug.LogWarning(
+                    $"{nameof(SlotCashCollectionService)} cannot collect because SlotMachine is missing.",
+                    collector != null ? collector : this);
+
+                return false;
+            }
+
+            SlotMachineCashSource cashSource =
+                slotMachine.GetComponent<SlotMachineCashSource>();
+
+            if (cashSource == null)
+            {
+                cashSource = slotMachine.gameObject.AddComponent<SlotMachineCashSource>();
+            }
+
+            return TryCollectCash(
+                cashSource,
+                requestedAmount,
+                out collectedAmount,
+                collector);
+        }
+
+        public bool TryCollectCash(
+            ICollectableCashSource cashSource,
+            int requestedAmount,
+            out int collectedAmount,
+            Object collector = null)
+        {
+            collectedAmount = 0;
+
+            if (cashSource == null)
+            {
+                Debug.LogWarning(
+                    $"{nameof(SlotCashCollectionService)} cannot collect because cash source is missing.",
+                    collector != null ? collector : this);
+
                 return false;
             }
 
             if (playerBalanceManager == null)
             {
-                Debug.LogError($"{nameof(SlotCashCollectionService)} cannot collect because PlayerBalanceManager is missing.", this);
+                Debug.LogError(
+                    $"{nameof(SlotCashCollectionService)} cannot collect because PlayerBalanceManager is missing.",
+                    this);
+
                 return false;
             }
 
@@ -56,7 +95,12 @@ namespace Project.Managers
                 return false;
             }
 
-            bool collected = slotMachine.TryCollectStoredCash(
+            if (!cashSource.CanCollectCash)
+            {
+                return false;
+            }
+
+            bool collected = cashSource.TryCollectCash(
                 requestedAmount,
                 out collectedAmount);
 
@@ -66,38 +110,31 @@ namespace Project.Managers
             }
 
             playerBalanceManager.AddBalance(collectedAmount);
-            AwardSlotCashCollectedXp(slotMachine, collectedAmount);
+
+            AwardCashCollectedXp(cashSource, collectedAmount);
 
             Debug.Log(
-                $"{GetCollectorName(collector)} collected £{collectedAmount} from {slotMachine.name}.",
-                collector != null ? collector : slotMachine);
+                $"{GetCollectorName(collector)} collected £{collectedAmount} from {cashSource.CashSourceName}.",
+                collector != null ? collector : this);
 
             return true;
         }
 
-        private void AwardSlotCashCollectedXp(SlotMachine slotMachine, int collectedAmount)
+        private void AwardCashCollectedXp(
+            ICollectableCashSource cashSource,
+            int collectedAmount)
         {
-            if (casinoProgressionManager == null || slotMachine == null || collectedAmount <= 0)
+            if (casinoProgressionManager == null ||
+                cashSource == null ||
+                collectedAmount <= 0)
             {
                 return;
             }
 
-            float multiplier = GetSlotMachineXpMultiplier(slotMachine);
-
             casinoProgressionManager.AddConfiguredXp(
                 CasinoXpSource.SlotCashCollected,
                 collectedAmount,
-                multiplier);
-        }
-
-        private static float GetSlotMachineXpMultiplier(SlotMachine slotMachine)
-        {
-            if (slotMachine == null || slotMachine.Config == null)
-            {
-                return 1f;
-            }
-
-            return Mathf.Max(0f, slotMachine.Config.CasinoXpMultiplier);
+                cashSource.XpMultiplier);
         }
 
         private static string GetCollectorName(Object collector)
