@@ -1,5 +1,6 @@
 using System;
 using Project.Progression;
+using Project.Staff;
 using UnityEngine;
 
 namespace Project.Managers
@@ -21,7 +22,6 @@ namespace Project.Managers
         private int currentXp;
 
         public int CurrentLevel => currentLevel;
-
         public int CurrentXp => currentXp;
 
         public int CurrentLevelXp
@@ -97,20 +97,39 @@ namespace Project.Managers
 
         public void AddConfiguredXp(CasinoXpSource source)
         {
-            AddConfiguredXp(source, quantity: 1, multiplier: 1f);
+            AddConfiguredXp(source, quantity: 1, multiplier: 1f, CasinoXpCollectorType.System);
         }
 
         public void AddConfiguredXp(CasinoXpSource source, int quantity)
         {
-            AddConfiguredXp(source, quantity, multiplier: 1f);
+            AddConfiguredXp(source, quantity, multiplier: 1f, CasinoXpCollectorType.System);
         }
 
         public void AddConfiguredXp(CasinoXpSource source, float multiplier)
         {
-            AddConfiguredXp(source, quantity: 1, multiplier);
+            AddConfiguredXp(source, quantity: 1, multiplier, CasinoXpCollectorType.System);
         }
 
         public void AddConfiguredXp(CasinoXpSource source, int quantity, float multiplier)
+        {
+            AddConfiguredXp(source, quantity, multiplier, CasinoXpCollectorType.System);
+        }
+
+        public void AddConfiguredXp(
+            CasinoXpSource source,
+            int quantity,
+            float multiplier,
+            UnityEngine.Object collector)
+        {
+            CasinoXpCollectorType collectorType = ResolveCollectorType(collector);
+            AddConfiguredXp(source, quantity, multiplier, collectorType);
+        }
+
+        public void AddConfiguredXp(
+            CasinoXpSource source,
+            int quantity,
+            float multiplier,
+            CasinoXpCollectorType collectorType)
         {
             if (levelConfig == null)
             {
@@ -136,7 +155,25 @@ namespace Project.Managers
                 return;
             }
 
-            double calculatedAmount = baseAmount * (double)quantity * multiplier;
+            float collectorMultiplier = GetCollectorXpMultiplier(collectorType);
+
+            if (collectorMultiplier <= 0f)
+            {
+                if (logXpChanges)
+                {
+                    Debug.Log(
+                        $"[{nameof(CasinoProgressionManager)}] Ignored XP from {source} because collector type {collectorType} has 0 XP multiplier.",
+                        this);
+                }
+
+                return;
+            }
+
+            double calculatedAmount =
+                baseAmount *
+                (double)quantity *
+                multiplier *
+                collectorMultiplier;
 
             if (calculatedAmount >= int.MaxValue)
             {
@@ -222,6 +259,52 @@ namespace Project.Managers
             }
         }
 
+        private float GetCollectorXpMultiplier(CasinoXpCollectorType collectorType)
+        {
+            switch (collectorType)
+            {
+                case CasinoXpCollectorType.Staff:
+                    return levelConfig != null ? levelConfig.StaffXpMultiplier : 1f;
+
+                case CasinoXpCollectorType.Player:
+                case CasinoXpCollectorType.System:
+                default:
+                    return 1f;
+            }
+        }
+
+        private static CasinoXpCollectorType ResolveCollectorType(UnityEngine.Object collector)
+        {
+            if (collector == null)
+            {
+                return CasinoXpCollectorType.System;
+            }
+
+            if (collector is StaffMember)
+            {
+                return CasinoXpCollectorType.Staff;
+            }
+
+            GameObject collectorObject = null;
+
+            if (collector is Component component)
+            {
+                collectorObject = component.gameObject;
+            }
+            else if (collector is GameObject gameObject)
+            {
+                collectorObject = gameObject;
+            }
+
+            if (collectorObject != null &&
+                collectorObject.GetComponentInParent<StaffMember>() != null)
+            {
+                return CasinoXpCollectorType.Staff;
+            }
+
+            return CasinoXpCollectorType.Player;
+        }
+
         private int ResolveLevel(int totalXp)
         {
             if (levelConfig == null)
@@ -231,5 +314,13 @@ namespace Project.Managers
 
             return levelConfig.GetLevelForTotalXp(totalXp);
         }
+
+#if UNITY_EDITOR
+        private void OnValidate()
+        {
+            startingLevelFallback = Mathf.Max(1, startingLevelFallback);
+            startingTotalXp = Mathf.Max(0, startingTotalXp);
+        }
+#endif
     }
 }

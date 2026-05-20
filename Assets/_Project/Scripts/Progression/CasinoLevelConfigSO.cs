@@ -21,7 +21,13 @@ namespace Project.Progression
         [SerializeField, Min(0)] private int slotSessionCompletedXp = 10;
         [SerializeField, Min(0)] private int customerCashedOutXp = 20;
         [SerializeField, Min(0)] private int slotCashCollectedXp = 1;
+        [SerializeField, Min(0)] private int tableCashCollectedXp = 1;
+        [SerializeField, Min(0)] private int barCashCollectedXp = 1;
         [SerializeField, Min(0)] private int manualDebugXp = 100;
+
+        [Header("Staff XP")]
+        [Tooltip("Multiplier applied to XP caused by staff actions. 1 = full XP, 0.5 = half XP, 0 = no XP.")]
+        [SerializeField, Range(0f, 1f)] private float staffXpMultiplier = 0.5f;
 
         [Header("Safety")]
         [Tooltip("Maximum loop iterations used when calculating a level from very high XP values.")]
@@ -36,7 +42,11 @@ namespace Project.Progression
         public int SlotSessionCompletedXp => slotSessionCompletedXp;
         public int CustomerCashedOutXp => customerCashedOutXp;
         public int SlotCashCollectedXp => slotCashCollectedXp;
+        public int TableCashCollectedXp => tableCashCollectedXp;
+        public int BarCashCollectedXp => barCashCollectedXp;
         public int ManualDebugXp => manualDebugXp;
+
+        public float StaffXpMultiplier => staffXpMultiplier;
 
         public int GetLevelForTotalXp(int totalXp)
         {
@@ -175,6 +185,12 @@ namespace Project.Progression
                 case CasinoXpSource.SlotCashCollected:
                     return slotCashCollectedXp;
 
+                case CasinoXpSource.TableCashCollected:
+                    return tableCashCollectedXp;
+
+                case CasinoXpSource.BarCashCollected:
+                    return barCashCollectedXp;
+
                 case CasinoXpSource.ManualDebug:
                     return manualDebugXp;
 
@@ -209,7 +225,11 @@ namespace Project.Progression
             slotSessionCompletedXp = Mathf.Max(0, slotSessionCompletedXp);
             customerCashedOutXp = Mathf.Max(0, customerCashedOutXp);
             slotCashCollectedXp = Mathf.Max(0, slotCashCollectedXp);
+            tableCashCollectedXp = Mathf.Max(0, tableCashCollectedXp);
+            barCashCollectedXp = Mathf.Max(0, barCashCollectedXp);
             manualDebugXp = Mathf.Max(0, manualDebugXp);
+
+            staffXpMultiplier = Mathf.Clamp01(staffXpMultiplier);
 
             maxLevelCalculationIterations = Mathf.Max(100, maxLevelCalculationIterations);
         }

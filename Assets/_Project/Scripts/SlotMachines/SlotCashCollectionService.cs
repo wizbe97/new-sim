@@ -1,5 +1,4 @@
 using Project.Economy;
-using Project.Progression;
 using Project.SlotMachines;
 using UnityEngine;
 
@@ -111,7 +110,7 @@ namespace Project.Managers
 
             playerBalanceManager.AddBalance(collectedAmount);
 
-            AwardCashCollectedXp(cashSource, collectedAmount);
+            AwardCashCollectedXp(cashSource, collectedAmount, collector);
 
             Debug.Log(
                 $"{GetCollectorName(collector)} collected £{collectedAmount} from {cashSource.CashSourceName}.",
@@ -122,7 +121,8 @@ namespace Project.Managers
 
         private void AwardCashCollectedXp(
             ICollectableCashSource cashSource,
-            int collectedAmount)
+            int collectedAmount,
+            Object collector)
         {
             if (casinoProgressionManager == null ||
                 cashSource == null ||
@@ -132,9 +132,10 @@ namespace Project.Managers
             }
 
             casinoProgressionManager.AddConfiguredXp(
-                CasinoXpSource.SlotCashCollected,
+                cashSource.CollectionXpSource,
                 collectedAmount,
-                cashSource.XpMultiplier);
+                cashSource.XpMultiplier,
+                collector);
         }
 
         private static string GetCollectorName(Object collector)

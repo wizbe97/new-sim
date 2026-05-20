@@ -1,3 +1,5 @@
+using Project.Progression;
+
 namespace Project.Economy
 {
     public interface ICollectableCashSource
@@ -7,6 +9,8 @@ namespace Project.Economy
         int AvailableCash { get; }
 
         bool CanCollectCash { get; }
+
+        CasinoXpSource CollectionXpSource { get; }
 
         float XpMultiplier { get; }
 

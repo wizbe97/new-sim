@@ -1,4 +1,5 @@
 using Project.Economy;
+using Project.Progression;
 using UnityEngine;
 
 namespace Project.SlotMachines
@@ -19,6 +20,9 @@ namespace Project.SlotMachines
             slotMachine != null &&
             !slotMachine.IsBeingMovedForPlacement &&
             slotMachine.StoredCashFromDeposits > 0;
+
+        public CasinoXpSource CollectionXpSource =>
+            CasinoXpSource.SlotCashCollected;
 
         public float XpMultiplier
         {

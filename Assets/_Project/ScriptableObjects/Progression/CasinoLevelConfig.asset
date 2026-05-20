@@ -19,6 +19,9 @@ MonoBehaviour:
   slotSpinXp: 1
   slotSessionCompletedXp: 10
   customerCashedOutXp: 1
-  slotCashCollectedXp: 1
+  slotCashCollectedXp: 1000
+  tableCashCollectedXp: 1
+  barCashCollectedXp: 1
   manualDebugXp: 100
+  staffXpMultiplier: 0.25
   maxLevelCalculationIterations: 10000
