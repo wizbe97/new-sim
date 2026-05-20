@@ -1637,10 +1637,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 5152255231265446455, guid: 8ec9afba1a21d2d48b231a31dbda5174, type: 3}
-      propertyPath: 'm_ActiveFontFeatures.Array.data[0]'
-      value: 1801810542
-      objectReference: {fileID: 0}
     - target: {fileID: 6633404952363253482, guid: 8ec9afba1a21d2d48b231a31dbda5174, type: 3}
       propertyPath: m_Name
       value: StarterSlotMachine (1)

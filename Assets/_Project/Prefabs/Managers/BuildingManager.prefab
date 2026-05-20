@@ -10,6 +10,9 @@ GameObject:
   m_Component:
   - component: {fileID: 3089301525074701403}
   - component: {fileID: 735952708839536412}
+  - component: {fileID: 844549466667395560}
+  - component: {fileID: 7696819395995449142}
+  - component: {fileID: 5795440660997172167}
   m_Layer: 0
   m_Name: BuildingManager
   m_TagString: Untagged
@@ -44,10 +47,23 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dc373ffbee419874c8c21426ddc47864, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  placementDistance: 2.25
-  positionSmoothTime: 0.04
-  rotationSmoothSpeed: 18
   rotationStepDegrees: 15
+--- !u!114 &844549466667395560
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4041559864707169167}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b4968c04e34ca5e49968f717606ace02, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  placementDistance: 2.25
+  lookPitchDistanceInfluence: 2
+  maxLookForwardOffset: 1.5
+  maxLookBackwardOffset: 1
   placementSurfaceLayerMask:
     serializedVersion: 2
     m_Bits: 64
@@ -55,14 +71,37 @@ MonoBehaviour:
   minimumSurfaceUpDot: 0.7
   rayStartHeight: 3
   rayDistance: 8
+  drawDebugRay: 1
+--- !u!114 &7696819395995449142
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4041559864707169167}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33b7687f9e8725244b8a72bbf8b51bba, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
   obstructionLayerMask:
     serializedVersion: 2
     m_Bits: 55
   obstructionTriggerInteraction: 1
-  ignoredObstructionLayers:
-    serializedVersion: 2
-    m_Bits: 64
   obstructionInset: 0.02
+--- !u!114 &5795440660997172167
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4041559864707169167}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa2d39a483db35a41a7719e044d65a4e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  positionSmoothTime: 0.04
+  rotationSmoothSpeed: 18
   validPreviewMaterial: {fileID: 2100000, guid: c4c89d92e8a6cc945b2fce530bebae5e, type: 2}
   invalidPreviewMaterial: {fileID: 2100000, guid: 123c61b1cd617c84ba0b4571bc865fc9, type: 2}
-  drawDebugRay: 1
